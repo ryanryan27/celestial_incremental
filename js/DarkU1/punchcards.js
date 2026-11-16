@@ -104,31 +104,37 @@ addLayer("pu", {
     },
     generateSelection() {
         player.pu.selectedPunchcards = [0, 0, 0, 0, 0]
+        let NONE = -1, COMMON = 0, RARE = 1, EPIC = 2, LEGENDARY = 3, RADIOACTIVE = 4
         let raritySelect = [[], [], [], [], []]
         for (let prop in player.pu.levelables) {
             if (run(layers.pu.levelables[prop].canSelect, layers.pu.levelables[prop]) && !getLevelableTier("pu", prop, true)) {
-                if (prop >= 100 && prop < 200) raritySelect[0].push(prop) // COMMON
-                if (prop >= 200 && prop < 300) raritySelect[1].push(prop) // RARE
-                if (prop >= 300 && prop < 400) raritySelect[2].push(prop) // EPIC
-                if (prop >= 400 && prop < 500) raritySelect[3].push(prop) // LEGENDARY
-                if (prop >= 500 && prop < 600) raritySelect[4].push(prop) // RADIOACTIVE
+                if (prop >= 100 && prop < 200) raritySelect[COMMON].push(prop) 
+                else if (prop >= 200 && prop < 300) raritySelect[RARE].push(prop)
+                else if (prop >= 300 && prop < 400) raritySelect[EPIC].push(prop)
+                else if (prop >= 400 && prop < 500) raritySelect[LEGENDARY].push(prop)
+                else if (prop >= 500 && prop < 600) raritySelect[RADIOACTIVE].push(prop)
             }
         }
         for (let i = 0; i < 4; i++) {
             let rng = Math.random()
-            let rarity = -1
+            let rarity = NONE
 
             // ROLL FOR IF NON-COMMON
-            if (rng < 0.1 && raritySelect[2].length > 0) rarity = 2 // EPIC
-            if (rng >= 0.1 && rng < 0.35 && raritySelect[1].length > 0) rarity = 1 // RARE
+            if (rng < 0.1 && raritySelect[EPIC].length > 0) rarity = EPIC
+            if (rng >= 0.1 && rng < 0.35 && raritySelect[RARE].length > 0) rarity = RARE
 
             // ROLL FAILED, TRY TO PICK RARITIES IN A ROW STARTING WITH COMMON
-            for (let j = 0; j < raritySelect.length; j++) {
-                if (rarity == -1 && raritySelect[j].length > 0) rarity = j
+            if(rarity == NONE){
+                for (let j of [COMMON, RARE, EPIC, RADIOACTIVE]) {
+                    if (raritySelect[j].length > 0) {
+                        rarity = j
+                        break
+                    }
+                }
             }
 
             // IF ALL THOSE FAILED, ITERATE
-            if (rarity == -1) continue
+            if (rarity == NONE) continue
 
             // CHOOSE CHOICE FROM PICKED RARITY, AND REMOVE FROM RARITY SELECT
             let choice = Math.floor(Math.random() * raritySelect[rarity].length)
@@ -137,28 +143,18 @@ addLayer("pu", {
         }
 
         //radioactive
-        if (hasUpgrade("ani", 26) && getLevelableTier("pu", 403, true) && 
-    (
-        ((run(layers.pu.levelables[501].canSelect, layers.pu.levelables[501])) && !getLevelableTier("pu", 501, true)) || 
-        ((run(layers.pu.levelables[502].canSelect, layers.pu.levelables[502])) && !getLevelableTier("pu", 502, true)) || 
-        ((run(layers.pu.levelables[503].canSelect, layers.pu.levelables[503])) && !getLevelableTier("pu", 503, true)) ||
-        ((run(layers.pu.levelables[504].canSelect, layers.pu.levelables[504])) && !getLevelableTier("pu", 504, true)) ||
-        ((run(layers.pu.levelables[505].canSelect, layers.pu.levelables[505])) && !getLevelableTier("pu", 505, true)) ||
-        ((run(layers.pu.levelables[506].canSelect, layers.pu.levelables[506])) && !getLevelableTier("pu", 506, true)) 
-        ) ) //be sure to keep updating
-        {
+        if (raritySelect[RADIOACTIVE].length > 0) {
             let rng2 = Math.random()
-            if (rng2 < 0.3)
-            {
+            if (rng2 < 0.3) {
                 let slot = getRandomInt(player.pu.selectedPunchcards.length-1)
-                let choice = Math.floor(Math.random() * raritySelect[4].length)
-                player.pu.selectedPunchcards[slot] = raritySelect[4][choice]
-                raritySelect[4].splice(choice, 1)
+                let choice = Math.floor(Math.random() * raritySelect[RADIOACTIVE].length)
+                player.pu.selectedPunchcards[slot] = raritySelect[RADIOACTIVE][choice]
+                raritySelect[RADIOACTIVE].splice(choice, 1)
             }
         }
 
         //legendary
-        if(raritySelect[3].length > 0){
+        if(raritySelect[LEGENDARY].length > 0){
             let random = Math.random()
             if (random < player.pu.legendaryPunchcardChance)
             {
@@ -168,8 +164,8 @@ addLayer("pu", {
                 player.pu.legendarySelectionActive = false
             }
             if (player.pu.legendarySelectionActive) {
-                let choice = Math.floor(Math.random() * raritySelect[3].length)
-                player.pu.selectedPunchcards[4] = raritySelect[3][choice]
+                let choice = Math.floor(Math.random() * raritySelect[LEGENDARY].length)
+                player.pu.selectedPunchcards[4] = raritySelect[LEGENDARY][choice]
             }
         } else {
             player.pu.legendarySelectionActive = false
