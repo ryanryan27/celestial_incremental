@@ -63,7 +63,7 @@ addLayer("pu", {
         if (run(layers.pu.levelables[402].canSelect, layers.pu.levelables[402]) && !getLevelableTier("pu", 402, true)) player.pu.legendaryPunchcardsUnlocked = player.pu.legendaryPunchcardsUnlocked.add(1)
         if (run(layers.pu.levelables[403].canSelect, layers.pu.levelables[403]) && !getLevelableTier("pu", 403, true)) player.pu.legendaryPunchcardsUnlocked = player.pu.legendaryPunchcardsUnlocked.add(1)
 
-        player.pu.legendaryPunchcardChance = Decimal.add(0.04, player.pu.legendaryPunchcardsUnlocked.sub(1).mul(0.02))
+        player.pu.legendaryPunchcardChance = player.pu.legendaryPunchcardsUnlocked.add(1).mul(0.02)
         player.pu.legendaryPunchcardChance = player.pu.legendaryPunchcardChance.add(buyableEffect("rp", 13))
 
         //reroll
@@ -97,6 +97,9 @@ addLayer("pu", {
                     player.pu.selectedPunchcards[i] = 0
                 }
             }
+        }
+        if (player.pu.legendaryPunchcardsUnlocked.lt(1)) {
+            player.pu.selectedPunchcards[4] = 0
         }
     },
     generateSelection() {
@@ -155,17 +158,21 @@ addLayer("pu", {
         }
 
         //legendary
-        let random = Math.random()
-        if (random < player.pu.legendaryPunchcardChance)
-        {
-            if (hasUpgrade("le", 201)) player.pu.legendarySelectionActive = true
-        } else
-        {
+        if(raritySelect[3].length > 0){
+            let random = Math.random()
+            if (random < player.pu.legendaryPunchcardChance)
+            {
+                if (hasUpgrade("le", 201)) player.pu.legendarySelectionActive = true
+            } else
+            {
+                player.pu.legendarySelectionActive = false
+            }
+            if (player.pu.legendarySelectionActive) {
+                let choice = Math.floor(Math.random() * raritySelect[3].length)
+                player.pu.selectedPunchcards[4] = raritySelect[3][choice]
+            }
+        } else {
             player.pu.legendarySelectionActive = false
-        }
-        if (player.pu.legendarySelectionActive) {
-            let choice = Math.floor(Math.random() * raritySelect[3].length)
-            player.pu.selectedPunchcards[4] = raritySelect[3][choice]
         }
     },
     clickables: {
