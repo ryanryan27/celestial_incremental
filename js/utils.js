@@ -483,6 +483,26 @@ function gridRun(layer, func, data, id) {
 		return layers[layer].grid[func];
 }
 
+
+//Functions etc for applying/keeping track of calculations
+const INIT = 0, ADD = 1, SUB = 2, MUL = 3, DIV = 4, POW = 5
+function applyOperations(operations){
+	let current = new Decimal(0)
+	for (const operation of operations){
+		const operand = operation[1]
+		switch(operation[0]){
+			case ADD: current = current.add(operand); break
+			case SUB: current = current.sub(operand); break
+			case MUL: current = current.mul(operand); break
+			case DIV: current = current.div(operand); break
+			case POW: current = current.pow(operand); break
+			case INIT: current = new Decimal(operand); break
+		}
+	}
+	return current
+}
+
+
 // ============================================================
 // Debugging
 

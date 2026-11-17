@@ -37,21 +37,15 @@
     }},
     automate() {
         if (hasUpgrade("sma", 201)) {
-            buyUpgrade("le", 11, false)
-            buyUpgrade("le", 12, false)
-            buyUpgrade("le", 13, false)
-            buyUpgrade("le", 14, false)
-            buyUpgrade("le", 15, false)
-            buyUpgrade("le", 16, false)
-            buyUpgrade("le", 17, false)
-            buyUpgrade("le", 18, false)
-            buyUpgrade("le", 19, false)
-            buyUpgrade("le", 21, false)
-            buyUpgrade("le", 22, false)
-            buyUpgrade("le", 23, false)
-            buyUpgrade("le", 24, false)
-            buyUpgrade("le", 101, false)
-            buyUpgrade("le", 102, false)
+            const automate_le = [
+                11,12,13,14,15,16,17,18,19,
+                21,22,23,24,
+                101,102
+            ]
+            for (const upg of automate_le){
+                buyUpgrade("le", upg, false)
+            }
+
         }
     },
     nodeStyle() {
@@ -71,26 +65,35 @@
         let onepersec = new Decimal(1)
         
         if (player.sma.inStarmetalChallenge) {
-            player.le.timeSinceEnter = player.le.timeSinceEnter.add(Decimal.div(delta, player.uni["D1"].tickspeed))
-            player.le.timeSinceReset = player.le.timeSinceReset.add(Decimal.div(delta, player.uni["D1"].tickspeed))
+            const delta_time = Decimal.div(delta, player.uni["D1"].tickspeed)
+            player.le.timeSinceEnter = player.le.timeSinceEnter.add(delta_time)
+            player.le.timeSinceReset = player.le.timeSinceReset.add(delta_time)
         }
 
         // Starmetal Alloy
-        player.le.starmetalAlloyReq = Decimal.pow(1e1, player.le.resetAmount.add(1).pow(1.5).floor()).mul(1e2)
-        if (player.le.resetAmount.gte(3)) player.le.starmetalAlloyReq = Decimal.pow(1e1, player.le.resetAmount.add(1).pow(2.5).floor()).mul(1e2)
-        if (player.le.resetAmount.gte(8)) player.le.starmetalAlloyReq = Decimal.pow(1e1, player.le.resetAmount.add(1).pow(2.6).floor()).mul(1e2)
-        player.le.starmetalAlloyReq = player.le.starmetalAlloyReq.div(player.dn.normalityEffect)
-        player.le.starmetalAlloyReq = player.le.starmetalAlloyReq.div(levelableEffect("spet", 208)[0])
-        player.le.starmetalAlloyReq = player.le.starmetalAlloyReq.div(buyableEffect("funify", 12))
-        if (getLevelableTier("pu", 100, true)) player.le.starmetalAlloyReq = player.le.starmetalAlloyReq.div(levelableEffect("pu", 100)[0])
-        if (getLevelableTier("pu", 403, true)) player.le.starmetalAlloyReq = player.le.starmetalAlloyReq.div(player.tr.radiation.effect)
-        if (getLevelableTier("pu", 403, true)) player.le.starmetalAlloyReq = player.le.starmetalAlloyReq.div(player.sr.spaceDecayEffect)
-        if (getLevelableTier("pu", 403, true) && hasUpgrade("mr", 14)) player.le.starmetalAlloyReq = player.le.starmetalAlloyReq.div(upgradeEffect("mr", 14))
+        let calculations = []
 
-        if (getLevelableTier("pu", 401, true)) player.le.starmetalAlloyReq = player.le.starmetalAlloyReq.pow(buyableEffect("bl", 21))
-        if (getLevelableTier("pu", 403, true)) player.le.starmetalAlloyReq = player.le.starmetalAlloyReq.pow(player.dec.electronsEffect)
-        if (hasMilestone("prj", 107)) player.le.starmetalAlloyReq = player.le.starmetalAlloyReq.div(player.prj.milestone107Effect)
+        let req_power = 1.5
+        if (player.le.resetAmount.gte(3)) req_power = 2.5
+        if (player.le.resetAmount.gte(8)) req_power = 2.6
+        calculations["smaReq"] = []
+        calculations["smaReq"].push([INIT, new Decimal(1e1)])
+        calculations["smaReq"].push([POW, player.le.resetAmount.add(1).pow(req_power).floor()])
+        calculations["smaReq"].push([MUL, 1e2])
+        calculations["smaReq"].push([DIV, player.dn.normalityEffect])
+        calculations["smaReq"].push([DIV, levelableEffect("spet", 208)[0]])
+        calculations["smaReq"].push([DIV, buyableEffect("funify", 12)])
+        if (getLevelableTier("pu", 100, true)) calculations["smaReq"].push([DIV,levelableEffect("pu", 100)[0]])
+        if (getLevelableTier("pu", 403, true)) calculations["smaReq"].push([DIV, player.tr.radiation.effect])
+        if (getLevelableTier("pu", 403, true)) calculations["smaReq"].push([DIV, player.sr.spaceDecayEffect])
+        if (getLevelableTier("pu", 403, true) && hasUpgrade("mr", 14)) calculations["smaReq"].push([DIV, upgradeEffect("mr", 14)])
+        if (getLevelableTier("pu", 401, true)) calculations["smaReq"].push([POW, buyableEffect("bl", 21)])
+        if (getLevelableTier("pu", 403, true)) calculations["smaReq"].push([POW, player.dec.electronsEffect])
+        if (hasMilestone("prj", 107)) calculations["smaReq"].push([DIV, player.prj.milestone107Effect])
 
+        Decimal.pow(1,2)
+        
+        player.le.starmetalAlloyReq = applyOperations(calculations["smaReq"])
 
         if (player.le.starmetalAlloyPause.gte(0)) layers.le.starmetalReset();
         player.le.starmetalAlloyPause = player.le.starmetalAlloyPause.sub(1)
