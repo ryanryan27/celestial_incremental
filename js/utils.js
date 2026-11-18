@@ -511,6 +511,25 @@ function createClickable(layer, id, clickableData){
 	setupTempData(layers[layer].clickables[id], tmp[layer].clickables[id] = {}, funcs[layer].clickables[id] = [])
 }
 
+function layerName(layer){
+	return layers[layer].name
+}
+
+function buyableTitle(layer, id, layername=false) {
+	let name = (layers[layer]?.buyables?.[id]?.title() ? layers[layer].buyables[id].title() : layer + " buyable " + id)
+	return (layername ? layerName(layer) +" Buyable: "+name : name)
+}
+
+function levelableTitle(layer, id, layername=false) {
+	let name = (layers[layer]?.levelables?.[id]?.title() ? layers[layer].levelables[id].title() : layer + " buyable " + id)
+	return (layername ? layerName(layer) +": "+name : name)
+}
+
+function upgradeTitle(layer, id, layername=false) {
+	let name = (layers[layer]?.upgrades?.[id]?.title ? layers[layer].upgrades[id].title : layer + " buyable " + id)
+	return (layername ? layerName(layer) +" Upgrade: "+name : name)
+}
+
 let currency_glossary = []
 currency_glossary["smaReq"] = "SMA Reset Req."
 

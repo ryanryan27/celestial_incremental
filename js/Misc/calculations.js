@@ -70,52 +70,14 @@ addLayer("calc", {
                 return look
             },
         },
-        101: {
-            title: "SMA Reset Cost",
-            canClick: true,
-            unlocked: true,
-            onClick() {
-                player.calc.selectedLayer = "le"
-                player.calc.selectedCurrency = "smaReq"
-            },
-            style() {
-                let look = {width: "200px", minHeight: "40px", fontSize: "14px", color: "var(--textColor)", background: "var(--miscButton)", border: "3px solid var(--miscButtonDisable)", borderRadius: "0"}
-                if (player.calc.selectedLayer == "le" && player.calc.selectedCurrency == "smaReq") look.borderColor = "var(--selected)"
-                return look
-            },
-        },
-        102: {
-            title: "Add Clickable",
-            canClick: true,
-            unlocked: true,
-            onClick() {
-                    let clickData = {
-                        title: "New Button?",
-                        canClick: true,
-                        unlocked: true,
-                        onClick() {
-                            
-                        },
-                        style() {
-                            let look = {width: "200px", minHeight: "40px", fontSize: "14px", color: "var(--textColor)", background: "var(--miscButton)", border: "3px solid var(--miscButtonDisable)", borderRadius: "0"}
-                            return look
-                        }
-                    }
-                    createClickable(this.layer,103,clickData)
-                    updateTabFormats()
-                },
-            style() {
-                let look = {width: "200px", minHeight: "40px", fontSize: "14px", color: "var(--textColor)", background: "var(--miscButton)", border: "3px solid var(--miscButtonDisable)", borderRadius: "0"}
-                return look
-            },
-        },
     },
     tabFormat: [
         ["row", [["clickable", 2], ["clickable", 7], ["clickable", 4], ["clickable", 5], ["clickable", 8]]],
         ["blank", "50px"],
         ["style-column", [
-            ["raw-html", "Calculation", {color: "var(--textColor)", fontSize: "24px", fontFamily: "monospace"}],
-        ], {width: "660px", height: "40px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginBottom: "-3px", borderRadius: "30px 30px 0 0"}],
+            ["raw-html", ()=>{return "Calculation" + (player.calc?.selectedCurrency ? ": " + currency_glossary[player.calc.selectedCurrency] : "")},
+                 {color: "var(--textColor)", fontSize: "24px", fontFamily: "monospace"}],
+        ], {width: "860px", height: "40px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginBottom: "-3px", borderRadius: "30px 30px 0 0"}],
         ["style-row", [
             ["style-column", [
                 ["theme-scroll-column", 
@@ -124,11 +86,11 @@ addLayer("calc", {
             ], {width: "200px", height: "600px", borderRight: "3px solid var(--menuBackground)"}],
             ["theme-scroll-column", 
                 () => {return layers.calc.generateCalculationList()()},
-            {width: "457px", height: "600px", background: "var(--miscButtonDisable)", borderTop:"3px solid var(--regBorder)"}]
-        ], {width: "660px", height: "600px", background: "var(--tabTitle)", border: "3px solid var(--menuBackground)"}],
+            {width: "657px", height: "600px", background: "var(--miscButtonDisable)", borderTop:"3px solid var(--regBorder)"}]
+        ], {width: "860px", height: "600px", background: "var(--tabTitle)", border: "3px solid var(--menuBackground)"}],
         ["style-row", [
             ["raw-html", "yippee it works!", {color: "var(--textColor)", fontSize: "20px", fontFamily: "monospace"}],
-        ], {width: "660px", height: "30px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginTop: "-3px", borderRadius: "0 0 30px 30px"}],
+        ], {width: "860px", height: "30px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginTop: "-3px", borderRadius: "0 0 30px 30px"}],
     ],
     layerShown() { return false },
     generateClickableTabs(){
@@ -144,7 +106,10 @@ addLayer("calc", {
             }
         } else if (player[layer]?.calculations !== undefined){
             layers.calc.generateCurrencyClickables(player[layer].calculations)
-            if (!!layers.calc.clickables[layer]) tabs.push(["hoverless-clickable", layer])
+            if (!layers.calc.clickables[layer]){
+                layers.calc.generateLayerClickables()
+            }
+            tabs.push(["hoverless-clickable", layer])
             for (click in player[layer].calculations){
                 if (!!layers.calc.clickables[click]) tabs.push(["hoverless-clickable", click])
             }
@@ -161,10 +126,10 @@ addLayer("calc", {
         if (selected.length == 0){
             calc_components.push(["style-row", [
                 ["raw-html", "No Calculation Selected" , {color: "var(--textColor)", fontSize: "14px", fontFamily: "monospace"}]
-            ], {width: "457px", height: "40px", borderBottom: "3px solid var(--regBorder)"}])
+            ], {width: "657px", height: "40px", borderBottom: "3px solid var(--regBorder)"}])
         }
         else {
-            selected.splice(0,0,["Total", applyOperations(selected), currency_glossary[player.calc.selectedCurrency]])
+            selected.splice(0,0,["Total", applyOperations(selected), "Related Values"])
             for (op of selected){
                 let bg = (op[0]=="Total"?"var(--miscButtonHover)":"var(--miscButtonDisable")
                 let source = (op[2] ? op[2] : "")
@@ -172,10 +137,10 @@ addLayer("calc", {
                     ["style-column", [["raw-html", op[0] , {color: "var(--textColor)", fontSize: "14px", fontFamily: "monospace"}]],
                         {width: "57px", height: "40px", borderLeft: "3px solid var(--regBorder)", background:bg}],
                     ["style-column", [["raw-html", format(op[1]) , {color: "var(--textColor)", fontSize: "14px", fontFamily: "monospace"}]],
-                        {width: "147px", height: "40px", borderLeft: "3px solid var(--regBorder)", background:bg}],
-                    ["style-column", [["raw-html", source , {color: "var(--textColor)", fontSize: "14px", fontFamily: "monospace"}]],
-                        {width: "241px", height: "40px", borderLeft: "3px solid var(--regBorder)", borderRight: "3px solid var(--regBorder)", background:bg}]
-                ],{width: "457px", height: "40px", borderBottom: "3px solid var(--regBorder)"}]
+                        {width: "127px", height: "40px", borderLeft: "3px solid var(--regBorder)", background:bg, "align-content":"start", "padding-left":"20px"}],
+                    ["style-column", [["raw-html", source , {color: "var(--textColor)", fontSize: "14px", fontFamily: "monospace", "text-align":"left", display:"block"}]],
+                        {width: "421px", height: "40px", borderLeft: "3px solid var(--regBorder)", borderRight: "3px solid var(--regBorder)", background:bg, "align-content":"start", "padding-left":"20px"}]
+                ],{width: "657px", height: "40px", borderBottom: "3px solid var(--regBorder)"}]
                 )
             }
             selected.splice(0,1)

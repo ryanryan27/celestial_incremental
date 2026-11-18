@@ -79,19 +79,19 @@
         if (player.le.resetAmount.gte(3)) req_power = 2.5
         if (player.le.resetAmount.gte(8)) req_power = 2.6
         calculations.smaReq = []
-        calculations.smaReq.push(["=", new Decimal(1e1)])
-        calculations.smaReq.push(["^", player.le.resetAmount.add(1).pow(req_power).floor()])
-        calculations.smaReq.push(["*", 1e2])
-        calculations.smaReq.push(["/", player.dn.normalityEffect])
-        calculations.smaReq.push(["/", levelableEffect("spet", 208)[0]])
-        calculations.smaReq.push(["/", buyableEffect("funify", 12)])
-        if (getLevelableTier("pu", 100, true)) calculations.smaReq.push(["/",levelableEffect("pu", 100)[0]])
-        if (getLevelableTier("pu", 403, true)) calculations.smaReq.push(["/", player.tr.radiation.effect])
-        if (getLevelableTier("pu", 403, true)) calculations.smaReq.push(["/", player.sr.spaceDecayEffect])
-        if (getLevelableTier("pu", 403, true) && hasUpgrade("mr", 14)) calculations.smaReq.push(["/", upgradeEffect("mr", 14)])
-        if (getLevelableTier("pu", 401, true)) calculations.smaReq.push(["^", buyableEffect("bl", 21)])
-        if (getLevelableTier("pu", 403, true)) calculations.smaReq.push(["^", player.dec.electronsEffect])
-        if (hasMilestone("prj", 107)) calculations.smaReq.push(["/", player.prj.milestone107Effect])
+        calculations.smaReq.push(["=", new Decimal(1e1), "Base Value"])
+        calculations.smaReq.push(["^", player.le.resetAmount.add(1).pow(req_power).floor(), "(1 + Universe Resets)^P"])
+        calculations.smaReq.push(["*", 1e2, "Static Multiplier"])
+        calculations.smaReq.push(["/", player.dn.normalityEffect, "Normality Effect"])
+        calculations.smaReq.push(["/", levelableEffect("spet", 208)[0], levelableTitle("spet", 208, true)])
+        calculations.smaReq.push(["/", buyableEffect("funify", 12), buyableTitle("funify",12,true)])
+        if (getLevelableTier("pu", 100, true)) calculations.smaReq.push(["/",levelableEffect("pu", 100)[0], levelableTitle("pu", 100, true)])
+        if (getLevelableTier("pu", 403, true)) calculations.smaReq.push(["/", player.tr.radiation.effect, "Radiation Effect"])
+        if (getLevelableTier("pu", 403, true)) calculations.smaReq.push(["/", player.sr.spaceDecayEffect, "Space Decay Effect"])
+        if (getLevelableTier("pu", 403, true) && hasUpgrade("mr", 14)) calculations.smaReq.push(["/", upgradeEffect("mr", 14), upgradeTitle("mr", 14, true)])
+        if (getLevelableTier("pu", 401, true)) calculations.smaReq.push(["^", buyableEffect("bl", 21), buyableTitle("bl", 21, true)])
+        if (getLevelableTier("pu", 403, true)) calculations.smaReq.push(["^", player.dec.electronsEffect, "Electron Effect"])
+        if (hasMilestone("prj", 107)) calculations.smaReq.push(["/", player.prj.milestone107Effect, "Interspace Project 1 Effect"])
         
         player.le.starmetalAlloyReq = applyOperations(calculations.smaReq)
 
