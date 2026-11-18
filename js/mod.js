@@ -13,7 +13,7 @@
 		"Cantepocalypse/perks.js", "Cantepocalypse/anonymity.js", "Cantepocalypse/repliTrees.js", "Cantepocalypse/repliGrass.js", "Cantepocalypse/grassSkip.js",
 		"Cantepocalypse/oil.js", "Singularity/singularity.js", "Check Back/epicPets.js", "Overworld/pollinator.js", "factory.js",
 		"Singularity/radiation.js", "Singularity/singularityDimensions.js", "Cantepocalypse/funify.js", "Singularity/coreScraps.js", "Hall of Celestials/celestialHall.js",
-		"Misc/settings.js", "Misc/savebank.js", "Misc/changelog.js", "Misc/jukebox.js", "Misc/hotkeys.js", "Check Back/pet.js",
+		"Misc/settings.js", "Misc/savebank.js", "Misc/changelog.js", "Misc/jukebox.js", "Misc/calculations.js", "Misc/hotkeys.js", "Check Back/pet.js",
 		"Singularity/starmetalAlloy.js", "DarkU1/darkU1.js", "DarkU1/lightExtractor.js", "DarkU1/darkRanks.js", "DarkU1/darkPrestige.js",
 		"DarkU1/boosters.js", "DarkU1/vaporizer.js", "DarkU1/generators.js", "DarkU1/darkGrass.js", "DarkU1/normality.js",
 		"Singularity/core.js", "Singularity/coreFragments.js", "DarkU1/funify2.js",
@@ -132,7 +132,7 @@ function updateStyles() {
 			if (player.c.cutscene1 || player.c.cutscene2 || player.c.cutscene13 || (player.c.currentCutscene == 35 && player.c.cutsceneIndex >= 24)) layerBG = "linear-gradient(-0deg, #000)"
 			if (player.c.currentCutscene == 33 || player.c.currentCutscene == 34 || (player.c.currentCutscene == 35 && player.c.cutsceneIndex < 24)) layerBG = "linear-gradient(-180deg,rgb(114, 8, 4) 0%, rgb(114, 4, 85) 100%)"
 			break;
-		case "settings": case "jukebox": case "savebank": case "changelog": case "credits":
+		case "settings": case "jukebox": case "savebank": case "changelog": case "credits": case "calc":
 			if (!player.sma.inStarmetalChallenge && !options.themeDarken) {
 				layerBG = "linear-gradient(90deg, #57636d, #2e3d49)"
 			} else {
@@ -2347,6 +2347,7 @@ var doNotCallTheseFunctionsEveryTick = [
 	"levelableButtonStyle",
 	"prismReset", "blueshiftReset", "starlightReset", "timeCapsuleReset", "createMultiverseMapConnection", "createClickableConnection",
 	"makeProject", "makeLightWell", "makePrismFountain", "makeWellFountain", "makeStarlightFountain", "getTimeReq", "getTimeCapsuleReq", "getTimeSpeed", "lightGain",
+	"generateClickableTabs", "generateCalculationList", "generateLayerClickables", "generateCurrencyClickables"
 ]
 
 function getStartPoints(){

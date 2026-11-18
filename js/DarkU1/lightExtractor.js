@@ -34,6 +34,8 @@
 
         potentialBoost: new Decimal(0),
         evolutionBoost: new Decimal(0),
+
+        calculations: [],
     }},
     automate() {
         if (hasUpgrade("sma", 201)) {
@@ -71,29 +73,27 @@
         }
 
         // Starmetal Alloy
-        let calculations = []
+        let calculations = player.le.calculations
 
         let req_power = 1.5
         if (player.le.resetAmount.gte(3)) req_power = 2.5
         if (player.le.resetAmount.gte(8)) req_power = 2.6
-        calculations["smaReq"] = []
-        calculations["smaReq"].push([INIT, new Decimal(1e1)])
-        calculations["smaReq"].push([POW, player.le.resetAmount.add(1).pow(req_power).floor()])
-        calculations["smaReq"].push([MUL, 1e2])
-        calculations["smaReq"].push([DIV, player.dn.normalityEffect])
-        calculations["smaReq"].push([DIV, levelableEffect("spet", 208)[0]])
-        calculations["smaReq"].push([DIV, buyableEffect("funify", 12)])
-        if (getLevelableTier("pu", 100, true)) calculations["smaReq"].push([DIV,levelableEffect("pu", 100)[0]])
-        if (getLevelableTier("pu", 403, true)) calculations["smaReq"].push([DIV, player.tr.radiation.effect])
-        if (getLevelableTier("pu", 403, true)) calculations["smaReq"].push([DIV, player.sr.spaceDecayEffect])
-        if (getLevelableTier("pu", 403, true) && hasUpgrade("mr", 14)) calculations["smaReq"].push([DIV, upgradeEffect("mr", 14)])
-        if (getLevelableTier("pu", 401, true)) calculations["smaReq"].push([POW, buyableEffect("bl", 21)])
-        if (getLevelableTier("pu", 403, true)) calculations["smaReq"].push([POW, player.dec.electronsEffect])
-        if (hasMilestone("prj", 107)) calculations["smaReq"].push([DIV, player.prj.milestone107Effect])
-
-        Decimal.pow(1,2)
+        calculations.smaReq = []
+        calculations.smaReq.push(["=", new Decimal(1e1)])
+        calculations.smaReq.push(["^", player.le.resetAmount.add(1).pow(req_power).floor()])
+        calculations.smaReq.push(["*", 1e2])
+        calculations.smaReq.push(["/", player.dn.normalityEffect])
+        calculations.smaReq.push(["/", levelableEffect("spet", 208)[0]])
+        calculations.smaReq.push(["/", buyableEffect("funify", 12)])
+        if (getLevelableTier("pu", 100, true)) calculations.smaReq.push(["/",levelableEffect("pu", 100)[0]])
+        if (getLevelableTier("pu", 403, true)) calculations.smaReq.push(["/", player.tr.radiation.effect])
+        if (getLevelableTier("pu", 403, true)) calculations.smaReq.push(["/", player.sr.spaceDecayEffect])
+        if (getLevelableTier("pu", 403, true) && hasUpgrade("mr", 14)) calculations.smaReq.push(["/", upgradeEffect("mr", 14)])
+        if (getLevelableTier("pu", 401, true)) calculations.smaReq.push(["^", buyableEffect("bl", 21)])
+        if (getLevelableTier("pu", 403, true)) calculations.smaReq.push(["^", player.dec.electronsEffect])
+        if (hasMilestone("prj", 107)) calculations.smaReq.push(["/", player.prj.milestone107Effect])
         
-        player.le.starmetalAlloyReq = applyOperations(calculations["smaReq"])
+        player.le.starmetalAlloyReq = applyOperations(calculations.smaReq)
 
         if (player.le.starmetalAlloyPause.gte(0)) layers.le.starmetalReset();
         player.le.starmetalAlloyPause = player.le.starmetalAlloyPause.sub(1)

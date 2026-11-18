@@ -485,23 +485,34 @@ function gridRun(layer, func, data, id) {
 
 
 //Functions etc for applying/keeping track of calculations
-const INIT = 0, ADD = 1, SUB = 2, MUL = 3, DIV = 4, POW = 5
+let calc_functions = []
+calc_functions["="] = (input, operand) => {return new Decimal(operand)}
+calc_functions["+"] = (input, operand) => {return input.add(operand)}
+calc_functions["-"] = (input, operand) => {return input.sub(operand)}
+calc_functions["*"] = (input, operand) => {return input.mul(operand)}
+calc_functions["/"] = (input, operand) => {return input.div(operand)}
+calc_functions["^"] = (input, operand) => {return input.pow(operand)}
+
 function applyOperations(operations){
 	let current = new Decimal(0)
 	for (const operation of operations){
-		const operand = operation[1]
-		switch(operation[0]){
-			case ADD: current = current.add(operand); break
-			case SUB: current = current.sub(operand); break
-			case MUL: current = current.mul(operand); break
-			case DIV: current = current.div(operand); break
-			case POW: current = current.pow(operand); break
-			case INIT: current = new Decimal(operand); break
-		}
+		current = calc_functions[operation[0]](current, operation[1])
 	}
 	return current
 }
 
+function createClickable(layer, id, clickableData){
+
+	if(!layers[layer]) return
+
+	layers[layer].clickables[id] = clickableData
+	layers[layer].clickables[id].layer = layer
+	layers[layer].clickables[id].id = ''+id
+	setupTempData(layers[layer].clickables[id], tmp[layer].clickables[id] = {}, funcs[layer].clickables[id] = [])
+}
+
+let currency_glossary = []
+currency_glossary["smaReq"] = "SMA Reset Req."
 
 // ============================================================
 // Debugging
