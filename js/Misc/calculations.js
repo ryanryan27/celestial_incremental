@@ -6,7 +6,7 @@ addLayer("calc", {
     startData() { return {
         unlocked: true,
         selectedLayer: "",
-        selectedCurrency: "",
+        visibleCurrency: [],
         allowedLayers: ["le","dn"]
     }},
     tooltip: "Calculations",
@@ -62,8 +62,7 @@ addLayer("calc", {
             canClick: true,
             unlocked: true,
             onClick() {
-                player.calc.selectedLayer = ""
-                player.calc.selectedCurrency = ""
+                player.calc.visibleCurrency = []
             },
             style() {
                 let look = {width: "200px", minHeight: "40px", fontSize: "14px", color: "var(--textColor)", background: "var(--miscButton)", border: "3px solid var(--miscButtonDisable)", borderRadius: "0"}
@@ -75,13 +74,13 @@ addLayer("calc", {
         ["row", [["clickable", 2], ["clickable", 7], ["clickable", 4], ["clickable", 5], ["clickable", 8]]],
         ["blank", "50px"],
         ["style-column", [
-            ["raw-html", ()=>{return "Calculation" + (player.calc?.selectedCurrency ? ": " + currency_glossary[player.calc.selectedCurrency] : "")},
+            ["raw-html", ()=>{return "Calculation" + (player.calc?.visibleCurrency["currency"] ? ": " + currency_glossary[player.calc.visibleCurrency["currency"]] : "")},
                  {color: "var(--textColor)", fontSize: "24px", fontFamily: "monospace"}],
         ], {width: "860px", height: "40px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginBottom: "-3px", borderRadius: "30px 30px 0 0"}],
         ["style-row", [
             ["style-column", [
                 ["theme-scroll-column", 
-                    () => {return layers.calc.generateClickableTabs()(player.calc.selectedLayer)},
+                    () => {return layers.calc.generateClickableTabs()()},
                 {width: "200px", height: "600px", background: "var(--layerBackground)"}],
             ], {width: "200px", height: "600px", borderRight: "3px solid var(--menuBackground)"}],
             ["theme-scroll-column", 
@@ -98,27 +97,23 @@ addLayer("calc", {
         let tabs = []
         tabs.push(["hoverless-clickable", 100])
 
-        if(layer==""){
-            layers.calc.generateLayerClickables()
 
-            for (click of player.calc.allowedLayers){
-                if (!!layers.calc.clickables[click]) tabs.push(["hoverless-clickable", click])
-            }
-        } else if (player[layer]?.calculations !== undefined){
-            layers.calc.generateCurrencyClickables(player[layer].calculations)
-            if (!layers.calc.clickables[layer]){
-                layers.calc.generateLayerClickables()
-            }
-            tabs.push(["hoverless-clickable", layer])
-            for (click in player[layer].calculations){
-                if (!!layers.calc.clickables[click]) tabs.push(["hoverless-clickable", click])
+        layers.calc.generateLayerClickables()
+
+        for (click of player.calc.allowedLayers){
+            if (!!layers.calc.clickables[click]) tabs.push(["hoverless-clickable", click])
+            if (layer == click && player[layer]?.calculations !== undefined){
+                layers.calc.generateCurrencyClickables(layer)
+                for (click2 in player[layer].calculations){
+                    if (!!layers.calc.clickables[click2]) tabs.push(["hoverless-clickable", click2])
+                }
             }
         }
         return () => {return tabs}
     },
     generateCalculationList(){
-        let layer = player.calc.selectedLayer
-        let currency = player.calc.selectedCurrency
+        let layer = player.calc.visibleCurrency["layer"]
+        let currency = player.calc.visibleCurrency["currency"]
 
         let selected = (player[layer]?.calculations?.[currency] !== undefined ? player[layer].calculations[currency] : [])
 
@@ -157,7 +152,7 @@ addLayer("calc", {
                 canClick: true,
                 unlocked: true,
                 onClick() {
-                    player.calc.selectedLayer = lay
+                    player.calc.selectedLayer = (player.calc.selectedLayer == lay ? "" : lay)
                 },
                 style() {
                     let look = {width: "200px", minHeight: "40px", fontSize: "14px", color: colors.color, background: colors.background, border: "3px solid "+colors.borderColor , borderRadius: "0"}
@@ -167,8 +162,8 @@ addLayer("calc", {
             createClickable("calc",lay,clickableData)
         }
     },
-    generateCurrencyClickables(currencies){
-        for (const currency in currencies){
+    generateCurrencyClickables(layer){
+        for (const currency in player[layer].calculations){
             if(!!layers.calc.clickables[currency]) continue
             let colors =  {background: "var(--miscButton)", borderColor: "var(--miscButtonDisable)", color:"var(--textColor)"}
 
@@ -177,11 +172,12 @@ addLayer("calc", {
                 canClick: true,
                 unlocked: true,
                 onClick() {
-                    player.calc.selectedCurrency = currency
+                    player.calc.visibleCurrency["currency"] = currency
+                    player.calc.visibleCurrency["layer"] = layer
                 },
                 style() {
                     let look = {width: "200px", minHeight: "40px", fontSize: "14px", color: colors.color, background: colors.background, border: "3px solid "+colors.borderColor , borderRadius: "0"}
-                    if (player.calc.selectedCurrency == currency) look.borderColor = "var(--selected)"
+                    if (player.calc.visibleCurrency["currency"] == currency) look.borderColor = "var(--selected)"
                     return look
                 }
             }
