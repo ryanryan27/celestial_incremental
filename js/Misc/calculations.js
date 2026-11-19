@@ -99,7 +99,7 @@ addLayer("calc", {
 
 
         layers.calc.generateLayerClickables()
-
+        
         for (click of player.calc.allowedLayers){
             if (!!layers.calc.clickables[click]) tabs.push(["hoverless-clickable", click])
             if (layer == click && player[layer]?.calculations !== undefined){
@@ -176,7 +176,7 @@ addLayer("calc", {
                     player.calc.visibleCurrency["layer"] = layer
                 },
                 style() {
-                    let look = {width: "200px", minHeight: "40px", fontSize: "14px", color: colors.color, background: colors.background, border: "3px solid "+colors.borderColor , borderRadius: "0"}
+                    let look = {width: "200px", minHeight: "40px", fontSize: "14px", color: colors.color, background: colors.background, border: "3px solid", borderColor:colors.borderColor , borderRadius: "0"}
                     if (player.calc.visibleCurrency["currency"] == currency) look.borderColor = "var(--selected)"
                     return look
                 }

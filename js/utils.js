@@ -531,7 +531,8 @@ function upgradeTitle(layer, id, layername=false) {
 }
 
 let currency_glossary = []
-currency_glossary["smaReq"] = "SMA Reset Req."
+currency_glossary["smaResetReq"] = "SMA Reset Req."
+currency_glossary["smaGrowth"] = "SMA Growth Amount"
 
 // ============================================================
 // Debugging
