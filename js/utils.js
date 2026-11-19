@@ -484,55 +484,6 @@ function gridRun(layer, func, data, id) {
 }
 
 
-//Functions etc for applying/keeping track of calculations
-let calc_functions = []
-calc_functions["="] = (input, operand) => {return new Decimal(operand)}
-calc_functions["+"] = (input, operand) => {return input.add(operand)}
-calc_functions["-"] = (input, operand) => {return input.sub(operand)}
-calc_functions["*"] = (input, operand) => {return input.mul(operand)}
-calc_functions["/"] = (input, operand) => {return input.div(operand)}
-calc_functions["^"] = (input, operand) => {return input.pow(operand)}
-
-function applyOperations(operations){
-	let current = new Decimal(0)
-	for (const operation of operations){
-		current = calc_functions[operation[0]](current, operation[1])
-	}
-	return current
-}
-
-function createClickable(layer, id, clickableData){
-
-	if(!layers[layer]) return
-
-	layers[layer].clickables[id] = clickableData
-	layers[layer].clickables[id].layer = layer
-	layers[layer].clickables[id].id = ''+id
-	setupTempData(layers[layer].clickables[id], tmp[layer].clickables[id] = {}, funcs[layer].clickables[id] = [])
-}
-
-function layerName(layer){
-	return layers[layer].name
-}
-
-function buyableTitle(layer, id, layername=false) {
-	let name = (layers[layer]?.buyables?.[id]?.title() ? layers[layer].buyables[id].title() : layer + " buyable " + id)
-	return (layername ? layerName(layer) +" Buyable: "+name : name)
-}
-
-function levelableTitle(layer, id, layername=false) {
-	let name = (layers[layer]?.levelables?.[id]?.title() ? layers[layer].levelables[id].title() : layer + " buyable " + id)
-	return (layername ? layerName(layer) +": "+name : name)
-}
-
-function upgradeTitle(layer, id, layername=false) {
-	let name = (layers[layer]?.upgrades?.[id]?.title ? layers[layer].upgrades[id].title : layer + " buyable " + id)
-	return (layername ? layerName(layer) +" Upgrade: "+name : name)
-}
-
-let currency_glossary = []
-currency_glossary["smaResetReq"] = "SMA Reset Req."
-currency_glossary["smaGrowth"] = "SMA Growth Amount"
 
 // ============================================================
 // Debugging
