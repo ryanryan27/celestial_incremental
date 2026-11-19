@@ -6,7 +6,10 @@ addLayer("calc", {
     startData() { return {
         unlocked: true,
         selectedLayer: "",
-        visibleCurrency: [],
+        visibleCurrency: {
+            currency: "",
+            layer: ""
+        },
         allowedLayers: ["le","dn"]
     }},
     tooltip: "Calculations",
@@ -62,7 +65,8 @@ addLayer("calc", {
             canClick: true,
             unlocked: true,
             onClick() {
-                player.calc.visibleCurrency = []
+                player.calc.visibleCurrency.currency = ""
+                player.calc.visibleCurrency.layer = ""
             },
             style() {
                 let look = {width: "200px", minHeight: "40px", fontSize: "14px", color: "var(--textColor)", background: "var(--miscButton)", border: "3px solid var(--miscButtonDisable)", borderRadius: "0"}
@@ -80,11 +84,11 @@ addLayer("calc", {
         ["style-row", [
             ["style-column", [
                 ["theme-scroll-column", 
-                    () => {return layers.calc.generateClickableTabs()()},
+                    () => {return layers.calc.generateClickableTabs()},
                 {width: "200px", height: "600px", background: "var(--layerBackground)"}],
             ], {width: "200px", height: "600px", borderRight: "3px solid var(--menuBackground)"}],
             ["theme-scroll-column", 
-                () => {return layers.calc.generateCalculationList()()},
+                () => {return layers.calc.generateCalculationList()},
             {width: "657px", height: "600px", background: "var(--miscButtonDisable)", borderTop:"3px solid var(--regBorder)"}]
         ], {width: "860px", height: "600px", background: "var(--tabTitle)", border: "3px solid var(--menuBackground)"}],
         ["style-row", [
@@ -109,11 +113,11 @@ addLayer("calc", {
                 }
             }
         }
-        return () => {return tabs}
+        return tabs
     },
     generateCalculationList(){
-        let layer = player.calc.visibleCurrency["layer"]
-        let currency = player.calc.visibleCurrency["currency"]
+        let layer = player.calc.visibleCurrency.layer
+        let currency = player.calc.visibleCurrency.currency
 
         let selected = (player[layer]?.calculations?.[currency] !== undefined ? player[layer].calculations[currency] : [])
 
@@ -140,7 +144,7 @@ addLayer("calc", {
             }
             selected.splice(0,1)
         }
-        return () => {return calc_components}
+        return calc_components
     },
     generateLayerClickables(){
         for (const lay of player.calc.allowedLayers){
@@ -155,7 +159,7 @@ addLayer("calc", {
                     player.calc.selectedLayer = (player.calc.selectedLayer == lay ? "" : lay)
                 },
                 style() {
-                    let look = {width: "200px", minHeight: "40px", fontSize: "14px", color: colors.color, background: colors.background, border: "3px solid "+colors.borderColor , borderRadius: "0"}
+                    let look = {width: "200px", minHeight: "40px", fontSize: "14px", color: colors.color, background: colors.background, border: "3px solid "+colors.borderColor , borderRadius: "0", 'transition-duration':"0s"}
                     return look
                 }
             }
@@ -172,12 +176,12 @@ addLayer("calc", {
                 canClick: true,
                 unlocked: true,
                 onClick() {
-                    player.calc.visibleCurrency["currency"] = currency
-                    player.calc.visibleCurrency["layer"] = layer
+                    player.calc.visibleCurrency.currency = currency
+                    player.calc.visibleCurrency.layer = layer
                 },
                 style() {
-                    let look = {width: "200px", minHeight: "40px", fontSize: "14px", color: colors.color, background: colors.background, border: "3px solid", borderColor:colors.borderColor , borderRadius: "0"}
-                    if (player.calc.visibleCurrency["currency"] == currency) look.borderColor = "var(--selected)"
+                    let look = {width: "200px", minHeight: "40px", fontSize: "14px", color: colors.color, background: colors.background, border: "3px solid", borderColor:colors.borderColor , borderRadius: "0", 'transition-duration':"0s"}
+                    if (player.calc.visibleCurrency.currency == currency) look.borderColor = "var(--selected)"
                     return look
                 }
             }
