@@ -258,6 +258,7 @@ function setTr(valName, operand, description="", reset=false){
 }
 
 function addTr(valName, input, operand, description=""){
+    if (operand.eq(0)) return input
     if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
 
     const result = input.add(operand)
@@ -267,6 +268,7 @@ function addTr(valName, input, operand, description=""){
 }
 
 function subTr(valName, input, operand, description=""){
+    if (operand.eq(0)) return input
     if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
 
     const result = input.sub(operand)
@@ -276,6 +278,7 @@ function subTr(valName, input, operand, description=""){
 }
 
 function mulTr(valName, input, operand, description=""){
+    if (operand.eq(1)) return input
     if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
 
     const result = input.mul(operand)
@@ -285,6 +288,7 @@ function mulTr(valName, input, operand, description=""){
 }
 
 function divTr(valName, input, operand, description=""){
+    if (operand.eq(1)) return input
     if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
 
     const result = input.div(operand)
@@ -294,6 +298,7 @@ function divTr(valName, input, operand, description=""){
 }
 
 function powTr(valName, input, operand, description=""){
+    if (operand.eq(1)) return input
     if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
 
     const result = input.pow(operand)
