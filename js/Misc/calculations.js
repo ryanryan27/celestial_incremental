@@ -97,7 +97,13 @@ addLayer("calc", {
             ["raw-html", "yippee it works!", {color: "var(--textColor)", fontSize: "20px", fontFamily: "monospace"}],
         ], {width: "903px", height: "30px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginTop: "-3px", borderRadius: "0 0 30px 30px"}],
     ]},
-    layerShown() { return false },
+    layerShown() {
+        //heehee haha dumb workaround for errors when tabformat is function
+        if (typeof tmp.calc.tabFormat === 'function'){
+            temp.calc.tabFormat = temp.calc.tabFormat()
+            layers.calc["layerShown"] = ()=>{return false}
+        }
+        return false },
     getClickableFormats(type){
         let tabs = []
         let uni = player.calc.selectedUni
@@ -258,7 +264,7 @@ function setTr(valName, operand, description="", reset=false){
 }
 
 function addTr(valName, input, operand, description=""){
-    if (operand.eq(0)) return input
+    if (typeof operand !== 'number' && operand.eq(0)) return input
     if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
 
     const result = input.add(operand)
@@ -268,7 +274,7 @@ function addTr(valName, input, operand, description=""){
 }
 
 function subTr(valName, input, operand, description=""){
-    if (operand.eq(0)) return input
+    if (typeof operand !== 'number' && operand.eq(0)) return input
     if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
 
     const result = input.sub(operand)
@@ -278,7 +284,7 @@ function subTr(valName, input, operand, description=""){
 }
 
 function mulTr(valName, input, operand, description=""){
-    if (operand.eq(1)) return input
+    if (typeof operand !== 'number' && operand.eq(1)) return input
     if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
 
     const result = input.mul(operand)
@@ -288,7 +294,7 @@ function mulTr(valName, input, operand, description=""){
 }
 
 function divTr(valName, input, operand, description=""){
-    if (operand.eq(1)) return input
+    if (typeof operand !== 'number' && operand.eq(1)) return input
     if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
 
     const result = input.div(operand)
@@ -298,7 +304,7 @@ function divTr(valName, input, operand, description=""){
 }
 
 function powTr(valName, input, operand, description=""){
-    if (operand.eq(1)) return input
+    if (typeof operand !== 'number' && operand.eq(1)) return input
     if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
 
     const result = input.pow(operand)
@@ -342,4 +348,4 @@ function upgradeTitle(layer, id, layername=false) {
 
 let currency_glossary = []
 currency_glossary["pointGain"] = {layer: "i", name:"Celestial Point Gain"}
-currency_glossary["yippee"] = {layer: "i", name:"test"}
+currency_glossary["smaRequirement"] = {layer: "le", name:"SMA Reset Requirement"}
