@@ -2347,7 +2347,7 @@ var doNotCallTheseFunctionsEveryTick = [
 	"levelableButtonStyle",
 	"prismReset", "blueshiftReset", "starlightReset", "timeCapsuleReset", "createMultiverseMapConnection", "createClickableConnection",
 	"makeProject", "makeLightWell", "makePrismFountain", "makeWellFountain", "makeStarlightFountain", "getTimeReq", "getTimeCapsuleReq", "getTimeSpeed", "lightGain",
-	"getClickableFormats", "calcFormatList", "generateClickables", "generateCurrencyClickables"
+	"getClickableFormats", "calcFormatList", "generateClickables", "getCalcClickables"
 ]
 
 function getStartPoints(){

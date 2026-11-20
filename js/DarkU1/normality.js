@@ -15,8 +15,6 @@
         normalityResetSafety: false,
 
         nMax: false,
-
-        calculations: [],
     }},
     automate() {
         if (hasUpgrade("sma", 21) && player.pet.legPetTimers[0].current.lte(0)) {

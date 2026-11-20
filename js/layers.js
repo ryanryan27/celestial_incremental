@@ -28,8 +28,6 @@
         pylonTierEffect: new Decimal(1),
         
         doomSoftcapStart: new Decimal("1e2000000"),
-
-        calculations: [],
     }
     },
     automate() {
@@ -88,9 +86,9 @@
     update(delta) {
         let onepersec = new Decimal(1)
 
-        // stopRain()
+       // stopRain()
 
-        let calcs = player.i.calculations
+        
 
         //KEEP THIS FOR NOW
         player.ak.guess = ""
@@ -125,72 +123,69 @@
 
         // START OF CELESTIAL POINT MODIFIERS
         player.gain = new Decimal(1)
-        
-        calcs.pointGain = []
-        calcs.pointGain.push(["=", new Decimal(1)])
-        calcs.pointGain.push(["*", player.r.rankEffect])
-        calcs.pointGain.push(["*", player.r.tierEffect])
-        calcs.pointGain.push(["*", buyableEffect("f", 11)])
-        calcs.pointGain.push(["*", buyableEffect("f", 12)])
-        calcs.pointGain.push(["*", buyableEffect("f", 13)])
-        calcs.pointGain.push(["*", buyableEffect("f", 14)])
-        calcs.pointGain.push(["*", buyableEffect("f", 15)])
-        calcs.pointGain.push(["*", buyableEffect("f", 16)])
-        calcs.pointGain.push(["*", buyableEffect("f", 17)])
-        calcs.pointGain.push(["*", buyableEffect("f", 18)])
-        if (hasUpgrade("cs", 201)) calcs.pointGain.push(["*", buyableEffect("f", 101)])
-        calcs.pointGain.push(["*", player.r.tetrEffect])
-        if (hasUpgrade("p", 11)) calcs.pointGain.push(["*", 3])
-        if (hasUpgrade("p", 12)) calcs.pointGain.push(["*", player.p.prestigeEffect])
-        calcs.pointGain.push(["*", player.f.factorPowerEffect])
-        calcs.pointGain.push(["*", buyableEffect("t", 15)])
-        calcs.pointGain.push(["*", buyableEffect("g", 14)])
-        calcs.pointGain.push(["*", player.gh.grasshopperEffects[0]])
-        if (hasMilestone("r", 13)) calcs.pointGain.push(["*", player.g.grassEffect2])
-        calcs.pointGain.push(["*", buyableEffect("m", 14)])
-        if (player.cb.effectActivate) calcs.pointGain.push(["*", player.cb.levelEffect])
-        calcs.pointGain.push(["*", levelableEffect("pet", 101)[0]])
-        calcs.pointGain.push(["*", player.d.boosterEffects[0]])
-        if (!inChallenge("ip", 16)) calcs.pointGain.push(["*", player.rf.abilityEffects[0]])
-        calcs.pointGain.push(["*", player.ad.antimatterEffect])
-        if (inChallenge("ip", 13) || player.po.hex || hasUpgrade("s", 18)) calcs.pointGain.push(["*", player.hpr.rankEffect[0][0]])
-        if (inChallenge("ip", 13) || player.po.hex || hasUpgrade("s", 18)) calcs.pointGain.push(["*", player.hpr.rankEffect[1][0]])
-        if (inChallenge("ip", 13) || player.po.hex || hasUpgrade("s", 18)) calcs.pointGain.push(["*", player.hpr.rankEffect[2][0]])
-        if (inChallenge("ip", 13) || player.po.hex || hasUpgrade("s", 18)) calcs.pointGain.push(["*", player.hpr.rankEffect[3][0]])
-        if (inChallenge("ip", 13) || player.po.hex || hasUpgrade("s", 18)) calcs.pointGain.push(["*", player.hpr.rankEffect[4][0]])
-        if (inChallenge("ip", 13) || player.po.hex || hasUpgrade("s", 18)) calcs.pointGain.push(["*", player.hpr.rankEffect[5][0]])
+        player.gain = player.gain.mul(player.r.rankEffect)
+        player.gain = player.gain.mul(player.r.tierEffect)
+        player.gain = player.gain.mul(buyableEffect("f", 11))
+        player.gain = player.gain.mul(buyableEffect("f", 12))
+        player.gain = player.gain.mul(buyableEffect("f", 13))
+        player.gain = player.gain.mul(buyableEffect("f", 14))
+        player.gain = player.gain.mul(buyableEffect("f", 15))
+        player.gain = player.gain.mul(buyableEffect("f", 16))
+        player.gain = player.gain.mul(buyableEffect("f", 17))
+        player.gain = player.gain.mul(buyableEffect("f", 18))
+        if (hasUpgrade("cs", 201)) player.gain = player.gain.mul(buyableEffect("f", 101))
+        player.gain = player.gain.mul(player.r.tetrEffect)
+        if (hasUpgrade("p", 11)) player.gain = player.gain.mul(3)
+        if (hasUpgrade("p", 12)) player.gain = player.gain.mul(player.p.prestigeEffect)
+        player.gain = player.gain.mul(player.f.factorPowerEffect)
+        player.gain = player.gain.mul(buyableEffect("t", 15))
+        player.gain = player.gain.mul(buyableEffect("g", 14))
+        player.gain = player.gain.mul(player.gh.grasshopperEffects[0])
+        if (hasMilestone("r", 13)) player.gain = player.gain.mul(player.g.grassEffect2)
+        player.gain = player.gain.mul(buyableEffect("m", 14))
+        if (player.cb.effectActivate) player.gain = player.gain.mul(player.cb.levelEffect)
+        player.gain = player.gain.mul(levelableEffect("pet", 101)[0])
+        player.gain = player.gain.mul(player.d.boosterEffects[0])
+        if (!inChallenge("ip", 16)) player.gain = player.gain.mul(player.rf.abilityEffects[0])
+        player.gain = player.gain.mul(player.ad.antimatterEffect)
+        if (inChallenge("ip", 13) || player.po.hex || hasUpgrade("s", 18)) player.gain = player.gain.mul(player.hpr.rankEffect[0][0])
+        if (inChallenge("ip", 13) || player.po.hex || hasUpgrade("s", 18)) player.gain = player.gain.mul(player.hpr.rankEffect[1][0])
+        if (inChallenge("ip", 13) || player.po.hex || hasUpgrade("s", 18)) player.gain = player.gain.mul(player.hpr.rankEffect[2][0])
+        if (inChallenge("ip", 13) || player.po.hex || hasUpgrade("s", 18)) player.gain = player.gain.mul(player.hpr.rankEffect[3][0])
+        if (inChallenge("ip", 13) || player.po.hex || hasUpgrade("s", 18)) player.gain = player.gain.mul(player.hpr.rankEffect[4][0])
+        if (inChallenge("ip", 13) || player.po.hex || hasUpgrade("s", 18)) player.gain = player.gain.mul(player.hpr.rankEffect[5][0])
 
         // CHALLENGE CONTENT
-        calcs.pointGain.push(["/", player.pe.pestEffect[0]])
-        if (inChallenge("ip", 13)) calcs.pointGain.push(["^", 0.75])
-        if (inChallenge("ip", 14)) calcs.pointGain.push(["/", player.r.challengeIVEffect])
-        if (inChallenge("ip", 15)) calcs.pointGain.push(["^", 0.9])
-        if (hasUpgrade("d", 13)) calcs.pointGain.push(["*", upgradeEffect("d", 13)])
-        if (hasUpgrade("d", 17)) calcs.pointGain.push(["*", upgradeEffect("d", 17)])
-        if (inChallenge("ip", 16)) calcs.pointGain.push(["^", 0.05])
-        if (inChallenge("ip", 16)) calcs.pointGain.push(["*", player.rf.abilityEffects[0]])
-        if (hasUpgrade("rf", 17)) calcs.pointGain.push(["*", upgradeEffect("rf", 17)])
+        player.gain = player.gain.div(player.pe.pestEffect[0])
+        if (inChallenge("ip", 13)) player.gain = player.gain.pow(0.75)
+        if (inChallenge("ip", 14)) player.gain = player.gain.div(player.r.challengeIVEffect)
+        if (inChallenge("ip", 15)) player.gain = player.gain.pow(0.9)
+        if (hasUpgrade("d", 13)) player.gain = player.gain.mul(upgradeEffect("d", 13))
+        if (hasUpgrade("d", 17)) player.gain = player.gain.mul(upgradeEffect("d", 17))
+        if (inChallenge("ip", 16)) player.gain = player.gain.pow(0.05)
+        if (inChallenge("ip", 16)) player.gain = player.gain.mul(player.rf.abilityEffects[0])
+        if (hasUpgrade("rf", 17)) player.gain = player.gain.mul(upgradeEffect("rf", 17))
 
         // CONTINUED REGULAR MODIFIERS
-        if (player.pol.pollinatorEffects.beetle.enabled) calcs.pointGain.push(["*", player.pol.pollinatorEffects.beetle.effects[0]])
-        calcs.pointGain.push(["*", buyableEffect("gh", 31)])
-        calcs.pointGain.push(["*", player.id.infinityPowerEffect2])
-        calcs.pointGain.push(["*", player.r.timeCubeEffects[0]])
-        calcs.pointGain.push(["*", player.ca.replicantiEffect3])
-        calcs.pointGain.push(["*", player.i.preOTFMult])
-        calcs.pointGain.push(["*", player.co.cores.point.effect[0]])
-        if (hasUpgrade("ep2", 1)) calcs.pointGain.push(["*", upgradeEffect("ep2", 1)])
+        if (player.pol.pollinatorEffects.beetle.enabled) player.gain = player.gain.mul(player.pol.pollinatorEffects.beetle.effects[0])
+        player.gain = player.gain.mul(buyableEffect("gh", 31))
+        player.gain = player.gain.mul(player.id.infinityPowerEffect2)
+        player.gain = player.gain.mul(player.r.timeCubeEffects[0])
+        player.gain = player.gain.mul(player.ca.replicantiEffect3)
+        player.gain = player.gain.mul(player.i.preOTFMult)
+        player.gain = player.gain.mul(player.co.cores.point.effect[0])
+        if (hasUpgrade("ep2", 1)) player.gain = player.gain.mul(upgradeEffect("ep2", 1))
 
         // POWER MODIFIERS
-        if (hasUpgrade("bi", 11)) calcs.pointGain.push(["^", 1.1])
-        calcs.pointGain.push(["^", player.co.cores.point.effect[1]])
-        calcs.pointGain.push(["^", player.sd.singularityPowerEffect3])
-        calcs.pointGain.push(["^", player.sdim.starPowerEffect])
-        calcs.pointGain.push(["^", player.se.starsExploreEffect[0][1]])
-        calcs.pointGain.push(["^", levelableEffect("ir", 2)[0]])
-        calcs.pointGain.push(["^", player.cof.coreFragmentEffects[0]])
-        calcs.pointGain.push(["^", buyableEffect("cof", 12)])
-        calcs.pointGain.push(["^", buyableEffect("gwaTemple", 22)])
+        if (hasUpgrade("bi", 11)) player.gain = player.gain.pow(1.1)
+        player.gain = player.gain.pow(player.co.cores.point.effect[1])
+        player.gain = player.gain.pow(player.sd.singularityPowerEffect3)
+        player.gain = player.gain.pow(player.sdim.starPowerEffect)
+        player.gain = player.gain.pow(player.se.starsExploreEffect[0][1])
+        player.gain = player.gain.pow(levelableEffect("ir", 2)[0])
+        player.gain = player.gain.pow(player.cof.coreFragmentEffects[0])
+        player.gain = player.gain.pow(buyableEffect("cof", 12))
+        player.gain = player.gain.pow(buyableEffect("gwaTemple", 22))
 
         // SOFTCAP OF DOOM
         player.i.doomSoftcap = new Decimal(0.5)
@@ -210,42 +205,25 @@
         if (hasMilestone("rar", 11)) doomWeaken = doomWeaken.mul(player.bee.beeEffect)
 
         // PLACE ANY BASE MODIFIERS TO SOFTCAP OF DOOM BEFORE SCALING
-        player.gain = applyOperations(calcs.pointGain)
         let amt = player.points
         if (player.gain.gte(player.points)) amt = player.gain
         player.i.doomSoftcap = player.i.doomSoftcap.div(amt.div(player.i.doomSoftcapStart).add(1).log(player.i.doomSoftcapStart).div(doomWeaken).add(1))
         if (hasUpgrade("depth2", 104)) player.i.doomSoftcap = player.i.doomSoftcap.max(0.01)
 
         // APPLY DOOM SOFTCAP
-        if (player.gain.gt(player.i.doomSoftcapStart)) {
-            calcs.pointGain.push(["/", player.i.doomSoftcapStart])
-            calcs.pointGain.push(["^", player.i.doomSoftcap])
-            calcs.pointGain.push(["*", player.i.doomSoftcapStart])
-            player.gain = applyOperations(calcs.pointGain)
-        }
+        if (player.gain.gt(player.i.doomSoftcapStart)) player.gain = player.gain.div(player.i.doomSoftcapStart).pow(player.i.doomSoftcap).mul(player.i.doomSoftcapStart)
 
         // ABNORMAL MODIFIERS, PLACE NEW MODIFIERS BEFORE THIS
         if (player.r.timeReversed) {
-            calcs.pointGain.push(["*", 0])
+            player.gain = player.gain.mul(0)
             player.points = player.points.div(player.points.add(1).log10().mul(0.1).add(1).mul(delta))
         }
+        if (player.po.halter.points.enabled == 1) player.gain = player.gain.div(player.po.halter.points.halt)
+        if (player.po.halter.points.enabled == 2 && player.gain.gt(player.po.halter.points.halt)) player.gain = player.po.halter.points.halt
+        if (!player.in.breakInfinity && player.gain.gte("9.99e309")) player.gain = new Decimal("9.99e309")
 
-        if (player.po.halter.points.enabled == 1) {
-            calcs.pointGain.push(["/", player.po.halter.points.halt])
-            player.gain = applyOperations(calcs.pointGain)
-        }
-        
-        if (player.po.halter.points.enabled == 2 && player.gain.gt(player.po.halter.points.halt)) {
-            player.gain = player.po.halter.points.halt
-            calcs.pointGain.push("=", player.po.halter.points.halt)
-        }
-        if (!player.in.breakInfinity && player.gain.gte("9.99e309")){
-            player.gain = new Decimal("9.99e309")
-            calcs.pointGain.push("=", new Decimal("9.99e309"))
-        }
-
+        setTr("pointGain", player.gain, "Whole Amount", true)
         // CELESTIAL POINT PER SECOND
-        
         player.points = player.points.add(player.gain.mul(delta))
 
         //pylon

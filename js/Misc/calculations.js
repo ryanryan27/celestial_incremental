@@ -11,6 +11,7 @@ addLayer("calc", {
             currency: "",
             layer: ""
         },
+        calculations: {},
     }},
     tooltip: "Calculations",
     color: "black",
@@ -74,40 +75,37 @@ addLayer("calc", {
             },
         },
     },
-    tabFormat: [
+    tabFormat() {return [
         ["row", [["clickable", 2], ["clickable", 7], ["clickable", 4], ["clickable", 5], ["clickable", 8]]],
         ["blank", "50px"],
         ["style-column", [
-            ["raw-html", ()=>{return "Calculation" + (player.calc?.visibleCurrency["currency"] ? ": " + currency_glossary[player.calc.visibleCurrency["currency"]] : "")},
+            ["raw-html", "Calculation" + (player.calc?.visibleCurrency.currency ? ": " + currency_glossary[player.calc.visibleCurrency.currency].name : ""),
                  {color: "var(--textColor)", fontSize: "24px", fontFamily: "monospace"}],
         ], {width: "903px", height: "40px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginBottom: "-3px", borderRadius: "30px 30px 0 0"}],
         ["style-row", [
             ["theme-scroll-column",//unis
-                () => {return layers.calc.getClickableFormats("uni")},
+                layers.calc.getClickableFormats("uni"),//() => {return layers.calc.getClickableFormats("uni")},
             {width: "40px", height: "600px", background: "var(--layerBackground)", borderRight: "3px solid var(--menuBackground)"}],
             ["theme-scroll-column",//layers 
-                () => {return layers.calc.getClickableFormats("layer")},
+                layers.calc.getClickableFormats("layer"),//() => {return layers.calc.getClickableFormats("layer")},
             {width: "200px", height: "600px", background: "var(--layerBackground)", borderRight: "3px solid var(--menuBackground)"}],
             ["theme-scroll-column",//calculations
-                () => {return layers.calc.calcFormatList()},
+                layers.calc.calcFormatList(),//() => {return layers.calc.calcFormatList()},
             {width: "657px", height: "600px", background: "var(--miscButtonDisable)"}]
         ], {width: "903px", height: "600px", background: "var(--tabTitle)", border: "3px solid var(--menuBackground)"}],
         ["style-row", [
             ["raw-html", "yippee it works!", {color: "var(--textColor)", fontSize: "20px", fontFamily: "monospace"}],
         ], {width: "903px", height: "30px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginTop: "-3px", borderRadius: "0 0 30px 30px"}],
-    ],
+    ]},
     layerShown() { return false },
     getClickableFormats(type){
         let tabs = []
         let uni = player.calc.selectedUni
         
         if (type == "uni"){
-            let uniList = Object.keys(universes)
-
-            layers.calc.generateClickables("uni")
-            for (const id of uniList){
-                if (readData(universes[id].disabled) == true) continue
-                if (!!layers.calc.clickables[id] && readData(universes[id].uniShown) == true) tabs.push(["hoverless-clickable", id])
+            for (const uniID of layers.calc.generateClickables("uni")){
+                if (readData(universes[uniID].disabled) == true) continue
+                if (!!layers.calc.clickables[uniID] && readData(universes[uniID].uniShown) == true) tabs.push(["hoverless-clickable", uniID])
             }
         }
         else if(type == "layer" && !!uni){
@@ -115,29 +113,30 @@ addLayer("calc", {
             
             tabs.push(["hoverless-clickable", 100])
 
-            layers.calc.generateClickables("layer", uni)
             
-            for (const id of universes[uni].tree.flat()){
-                if (readData(layers[id].deactivated) == true) continue
-                if (!!layers.calc.clickables[id] && readData(layers[id].layerShown)) tabs.push(["hoverless-clickable", id])
-                if (layer == id && player[layer]?.calculations !== undefined){
-                    layers.calc.generateCurrencyClickables(layer)
-                    for (const calcID in player[layer].calculations){
-                        if (!!layers.calc.clickables[calcID]) tabs.push(["hoverless-clickable", calcID])
+            
+            for (const layerID of layers.calc.generateClickables("layer", uni)){
+                if (readData(layers[layerID].deactivated) == true) continue
+                if (!!layers.calc.clickables[layerID] && readData(layers[layerID].layerShown)) tabs.push(["hoverless-clickable", layerID])
+                
+                if (layer == layerID){
+                    for (const calcID of layers.calc.getCalcClickables(layer)){
+                        tabs.push(["hoverless-clickable", calcID])
                     }
                 }
             }
         }
         else if(type == "layer"){
             tabs.push(["hoverless-clickable", 100])
+            
         }
+        tabs
         return tabs
     },
     calcFormatList(){
-        let layer = player.calc.visibleCurrency.layer
         let currency = player.calc.visibleCurrency.currency
 
-        let selected = (player[layer]?.calculations?.[currency] !== undefined ? player[layer].calculations[currency] : [])
+        let selected = (!!player.calc.calculations[currency] ? player.calc.calculations[currency] : [])
 
         let calc_components = []
         if (selected.length == 0){
@@ -146,40 +145,52 @@ addLayer("calc", {
             ], {width: "651px", height: "40px", border: "3px solid var(--regBorder)", }])
         }
         else {
-            selected.splice(0,0,["Total", applyOperations(selected), "Related Values"])
+            selected.splice(0,0,{operation:"Total", effect:selected.at(-1).result, result:selected.at(-1).result, description:"Related Values"})
             for (op of selected){
-                let bg = (op[0]=="Total"?"var(--miscButtonHover)":"var(--miscButtonDisable")
-                let border = (op[0]=="Total"? {'border-block':"3px solid var(--regBorder)"} : {'border-bottom':"3px solid var(--regBorder)"})
+                let bg = (op.operation=="Total"?"var(--miscButtonHover)":"var(--miscButtonDisable")
+                let border = (op.operation=="Total"? {'border-block':"3px solid var(--regBorder)"} : {'border-bottom':"3px solid var(--regBorder)"})
                 let font = {color: "var(--textColor)", fontSize: "14px", fontFamily: "monospace"}
-                let source = (op[2] ? op[2] : "")
                 calc_components.push(["style-row",[
-                    ["style-column", [["raw-html", op[0] , font]],
+                    ["style-column", [["raw-html", op.operation , font]],
                         {width: "57px", height: "40px", background:bg, 'border-left': "3px solid var(--regBorder)"}],
-                    ["style-column", [["raw-html", format(op[1]) , font]],
+                    ["style-column", [["raw-html", format(op.effect) , font]],
                         {width: "127px", height: "40px", background:bg, "align-content":"start", "padding-left":"20px", 'border-inline': "3px solid var(--regBorder)"}],
-                    ["style-column", [["raw-html", source , Object.assign({"text-align":"left", display:"block"}, font)]],
+                    ["style-column", [["raw-html", op.description , Object.assign({"text-align":"left", display:"block"}, font)]],
                         {width: "418px", height: "40px", background:bg, "align-content":"start", "padding-left":"20px", 'border-right': "3px solid var(--regBorder)"}]
                 ], Object.assign({width: "654px", height: "40px"}, border)]
                 )
             }
             selected.splice(0,1)
         }
+        calc_components
         return calc_components
     },
     generateClickables(type, uniID=""){
-        if (type != "uni" && (type != "layer" || uniID == "")) return
+        let calcSet = []
+        if (type != "uni" && (type != "layer" || uniID == "")) return calcSet
 
         let idSet = type == "uni" ? Object.keys(universes) : universes[uniID].tree.flat()
         let elemType = type == "uni" ? universes : layers
-        let selectType = type == "uni" ? "selectedUni" : "selectedLayer"
+        let selectFunc = (type == "uni" ? (uni) => {
+            player.calc.selectedUni = (player.calc.selectedUni == uni ? "" : uni)
+            player.calc.selectedLayer = ""
+        } 
+        : (lay) => {
+            player.calc.selectedLayer = (player.calc.selectedLayer == lay ? "" : lay)
+        })
         let size = type == "uni" ? {width: "40px", minHeight: "40px"} : {width: "200px", minHeight: "40px"}
         let text = type == "uni" ? "symbol" : "name"
 
         for (const id of idSet){
 
-            if(!!layers.calc.clickables[id]) continue
+            
             if(type == "uni" && readData(universes[id].disabled) == true) continue
             if(type == "layer" && readData(layers[id].deactivated) == true) continue
+
+            if(!!layers.calc.clickables[id]){
+                calcSet.push(id)
+                continue
+            }
 
             let look = {background: "var(--miscButton)", border: "3px solid rgba(0,0,0,0.3)", color:"rgba(0,0,0,0.5)"}
             let ns = readData(elemType[id].nodeStyle)
@@ -199,7 +210,7 @@ addLayer("calc", {
                 canClick: true,
                 unlocked: true,
                 onClick() {
-                    player.calc[selectType] = (player.calc[selectType] == id ? "" : id)
+                    selectFunc(id)
                 },
                 style() {
                     let sty = {fontSize: "14px", borderRadius: "0", 'transition-duration':"0s"}
@@ -207,15 +218,18 @@ addLayer("calc", {
                 }
             }
             createClickable("calc",id,clickableData)
+            calcSet.push(id)
         }
+        return calcSet
     },
-    generateCurrencyClickables(layer){
-        for (const currency in player[layer].calculations){
-            if(!!layers.calc.clickables[currency]) continue
+    getCalcClickables(layer){
+        let layerCalcs = []
+        for (const currency of Object.keys(player.calc.calculations)){
+            if(currency_glossary[currency].layer != layer) continue
             let colors =  {background: "var(--miscButton)", borderColor: "var(--miscButtonDisable)", color:"var(--textColor)"}
 
             let clickableData = {
-                title: currency_glossary[currency],
+                title: currency_glossary[currency].name,
                 canClick: true,
                 unlocked: true,
                 onClick() {
@@ -229,42 +243,81 @@ addLayer("calc", {
                 }
             }
             createClickable("calc",currency,clickableData)
+            layerCalcs.push(currency)
         }
+        return layerCalcs
     },
 })
 
 
 
-
-//Functions etc for applying/keeping track of calculations
-let calc_functions = []
-calc_functions["="] = (_input, operand) => {return new Decimal(operand)}
-calc_functions["+"] = (input, operand) => {return input.add(operand)}
-calc_functions["-"] = (input, operand) => {return input.sub(operand)}
-calc_functions["*"] = (input, operand) => {return input.mul(operand)}
-calc_functions["/"] = (input, operand) => {return input.div(operand)}
-calc_functions["^"] = (input, operand) => {return input.pow(operand)}
-
-function applyOperations(operations){
-	let current = new Decimal(0)
-	for (const operation of operations){
-		current = calc_functions[operation[0]](current, operation[1])
-	}
-	return current
+function setTr(valName, operand, description="", reset=false){
+    if (reset || !player.calc.calculations[valName]) player.calc.calculations[valName] = []
+    player.calc.calculations[valName].push({operation:'=', effect:operand, result:operand, description:description})
+    return operand
 }
+
+function addTr(valName, input, operand, description=""){
+    if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
+
+    const result = input.add(operand)
+    player.calc.calculations[valName].push({operation:'+', effect:operand, result:result, description:description})
+
+    return result
+}
+
+function subTr(valName, input, operand, description=""){
+    if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
+
+    const result = input.sub(operand)
+    player.calc.calculations[valName].push({operation:'-', effect:operand, result:result, description:description})
+
+    return result
+}
+
+function mulTr(valName, input, operand, description=""){
+    if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
+
+    const result = input.mul(operand)
+    player.calc.calculations[valName].push({operation:'x', effect:operand, result:result, description:description})
+
+    return result
+}
+
+function divTr(valName, input, operand, description=""){
+    if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
+
+    const result = input.div(operand)
+    player.calc.calculations[valName].push({operation:'/', effect:operand, result:result, description:description})
+
+    return result
+}
+
+function powTr(valName, input, operand, description=""){
+    if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
+
+    const result = input.pow(operand)
+    player.calc.calculations[valName].push({operation:'^', effect:operand, result:result, description:description})
+
+    return result
+}
+
 
 function createClickable(layer, id, clickableData){
 
 	if(!layers[layer]) return
+    
+    if(!layers[layer].clickables[id]) layers[layer].clickables[id] = {}
 
-	layers[layer].clickables[id] = clickableData
+	Object.assign(layers[layer].clickables[id], clickableData)
 	layers[layer].clickables[id].layer = layer
 	layers[layer].clickables[id].id = ''+id
 	setupTempData(layers[layer].clickables[id], tmp[layer].clickables[id] = {}, funcs[layer].clickables[id] = [])
+    player[layer].clickables[id] = ""
 }
 
 function layerName(layer){
-	return layers[layer].name
+	return readData(layers[layer].name)
 }
 
 function buyableTitle(layer, id, layername=false) {
@@ -283,6 +336,5 @@ function upgradeTitle(layer, id, layername=false) {
 }
 
 let currency_glossary = []
-currency_glossary["pointGain"] = "Celestial Point Gain"
-currency_glossary["smaResetReq"] = "SMA Reset Req."
-currency_glossary["smaGrowth"] = "SMA Store Amount"
+currency_glossary["pointGain"] = {layer: "i", name:"Celestial Point Gain"}
+currency_glossary["yippee"] = {layer: "i", name:"test"}
