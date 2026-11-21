@@ -260,63 +260,88 @@ addLayer("calc", {
 })
 
 
+class TrackedDecimal extends Decimal{
 
-function setTr(valName, operand, description="", reset=false){
-    if (reset || !player.calc.calculations[valName]) player.calc.calculations[valName] = []
-    player.calc.calculations[valName].push({operation:'=', effect:operand, result:operand, description:description})
-    return operand
+    static #handler = {
+        get(target, prop, receiver) {
+            if (Object.hasOwn(target, prop) || Object.getOwnPropertyNames(Object.getPrototypeOf(target)).includes(prop)) return target[prop]
+
+            if(typeof target.dec[prop] === 'function'){
+                return (...args) => {
+                    let res = Reflect.apply(target.dec[prop], target.dec, args)
+                    if(res instanceof Decimal){
+                        target.dec = res
+                        return receiver
+                    } else {
+                        return res
+                    }
+                }
+            }
+            return target.dec[prop]
+        },
+        set(target, prop, value){
+            if (prop == 'dec') {
+                Reflect.set(target, prop, value)
+                return true
+            }
+            return Reflect.set(target.dec, prop, value)
+        }
+    }
+
+    constructor(value, trackingArray){
+        if (Object.hasOwn(value, "dec") && Object.hasOwn(value, "track")){
+            super(0)
+            delete this.layer
+            delete this.mag
+            delete this.sign
+            this.dec = value.dec
+            this.track = value.track
+            return
+        }
+
+        trackingArray.splice(0)
+    
+        const trackerData = {
+            dec: new Decimal(value),
+            track: trackingArray
+        }
+        return new Proxy(new TrackedDecimal(trackerData), TrackedDecimal.#handler)
+    }
+
+    set(val, desc="", reset=false){
+        this.dec = new Decimal(val)
+        if(reset)this.track.splice(0)
+        this.track.push({operation:'=', effect:val, result:val, description:desc})
+        return this
+    }
+
+    doOperation(op, opName, val, desc, tracked, doesNothingVal){
+        if (typeof val !== 'number' && val.eq(doesNothingVal)) return (tracked ? this : this.dec)
+        let result = this.dec[opName](val)
+        if (tracked){
+            this.dec = result
+            this.track.push({operation:op, effect:val, result:result, description:desc})
+            return this
+        } else return result
+    }
+
+    add(val, desc="", tracked=true){
+        return this.doOperation("+", 'add', val, desc, tracked, 0)
+    }
+    sub(val, desc="", tracked=true){
+        return this.doOperation("-", 'sub', val, desc, tracked, 0)
+    }
+    mul(val, desc="", tracked=true){
+        return this.doOperation("x", 'mul', val, desc, tracked, 1)
+    }
+    div(val, desc="", tracked=true){
+        return this.doOperation("/", 'div', val, desc, tracked, 1)
+    }
+    pow(val, desc="", tracked=true){
+        return this.doOperation("^", 'pow', val, desc, tracked, 1)
+    }
+
 }
-
-function addTr(valName, input, operand, description=""){
-    if (typeof operand !== 'number' && operand.eq(0)) return input
-    if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
-
-    const result = input.add(operand)
-    player.calc.calculations[valName].push({operation:'+', effect:operand, result:result, description:description})
-
-    return result
-}
-
-function subTr(valName, input, operand, description=""){
-    if (typeof operand !== 'number' && operand.eq(0)) return input
-    if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
-
-    const result = input.sub(operand)
-    player.calc.calculations[valName].push({operation:'-', effect:operand, result:result, description:description})
-
-    return result
-}
-
-function mulTr(valName, input, operand, description=""){
-    if (typeof operand !== 'number' && operand.eq(1)) return input
-    if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
-
-    const result = input.mul(operand)
-    player.calc.calculations[valName].push({operation:'x', effect:operand, result:result, description:description})
-
-    return result
-}
-
-function divTr(valName, input, operand, description=""){
-    if (typeof operand !== 'number' && operand.eq(1)) return input
-    if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
-
-    const result = input.div(operand)
-    player.calc.calculations[valName].push({operation:'/', effect:operand, result:result, description:description})
-
-    return result
-}
-
-function powTr(valName, input, operand, description=""){
-    if (typeof operand !== 'number' && operand.eq(1)) return input
-    if (!player.calc.calculations[valName]) player.calc.calculations[valName] = []
-
-    const result = input.pow(operand)
-    player.calc.calculations[valName].push({operation:'^', effect:operand, result:result, description:description})
-
-    return result
-}
-
 
 function createClickable(layer, id, clickableData){
 
@@ -353,4 +378,4 @@ function upgradeTitle(layer, id, layername=false) {
 let currency_glossary = []
 currency_glossary["pointGain"] = {layer: "i", name:"Celestial Point Gain"}
 currency_glossary["py1Gain"] = {layer: "i", name:"Ancient Pylon Energy gain"}
-currency_glossary["smaRequirement"] = {layer: "le", name:"SMA Reset Requirement"}
+//currency_glossary["smaRequirement"] = {layer: "le", name:"SMA Reset Requirement"}
