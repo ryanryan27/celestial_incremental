@@ -123,10 +123,14 @@ addLayer("calc", {
             
             for (const layerID of layers.calc.generateClickables("layer", uni)){
                 if (readData(layers[layerID].deactivated) == true) continue
+
+                let calcIDs = layers.calc.getCalcClickables(layerID)
+
+                if (calcIDs.length == 0) continue
                 if (!!layers.calc.clickables[layerID] && readData(layers[layerID].layerShown)) tabs.push(["hoverless-clickable", layerID])
                 
                 if (layer == layerID){
-                    for (const calcID of layers.calc.getCalcClickables(layer)){
+                    for (const calcID of calcIDs){
                         tabs.push(["hoverless-clickable", calcID])
                     }
                 }
@@ -332,7 +336,7 @@ function layerName(layer){
 }
 
 function buyableTitle(layer, id, layername=false) {
-	let name = (layers[layer]?.buyables?.[id]?.title() ? layers[layer].buyables[id].title() : layer + " buyable " + id)
+	let name = (!!layers[layer]?.buyables?.[id]?.title ? readData(layers[layer].buyables[id].title) : layer + " buyable " + id)
 	return (layername ? layerName(layer) +" Buyable: "+name : name)
 }
 
@@ -348,4 +352,5 @@ function upgradeTitle(layer, id, layername=false) {
 
 let currency_glossary = []
 currency_glossary["pointGain"] = {layer: "i", name:"Celestial Point Gain"}
+currency_glossary["py1Gain"] = {layer: "i", name:"Ancient Pylon Energy gain"}
 currency_glossary["smaRequirement"] = {layer: "le", name:"SMA Reset Requirement"}
