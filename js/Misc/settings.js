@@ -45,6 +45,15 @@ addLayer("settings", {
             },
             style: { width: '125px', minHeight: '50px', color: "var(--textColor)", background: "var(--miscButtonDisable)", borderRadius: '0px', border: "3px solid var(--regBorder)", margin: "0px 5px" },
         },
+        8: {
+            title() { return "Calculations" },
+            canClick() { return true },
+            unlocked() { return true },
+            onClick() {
+                player.tab = "calc"
+            },
+            style: { width: '125px', minHeight: '50px', color: "var(--textColor)", background: "var(--miscButtonDisable)", borderRadius: '0px', border: "3px solid var(--regBorder)", margin: "0px 5px" },
+        },
         11: {
             title() { return "Save" },
             canClick: true,
@@ -593,7 +602,7 @@ addLayer("settings", {
         },
     },
     tabFormat: [
-        ["row", [["clickable", 2], ["clickable", 7], ["clickable", 4], ["clickable", 5]]],
+        ["row", [["clickable", 2], ["clickable", 7], ["clickable", 4], ["clickable", 5], ["clickable", 8]]],
         ["blank", "50px"],
         ["style-row", [
             ["column", [
