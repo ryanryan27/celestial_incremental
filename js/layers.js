@@ -122,7 +122,7 @@
         //----------------------------------------
 
         // START OF CELESTIAL POINT MODIFIERS
-        player.gain = new Decimal(1)
+        player.gain = new TrackedDecimal(1, player.calc.calculations['pointGain']=[])
         player.gain = player.gain.mul(player.r.rankEffect)
         player.gain = player.gain.mul(player.r.tierEffect)
         player.gain = player.gain.mul(buyableEffect("f", 11))
@@ -206,7 +206,7 @@
 
         // PLACE ANY BASE MODIFIERS TO SOFTCAP OF DOOM BEFORE SCALING
         let amt = player.points
-        if (player.gain.gte(player.points)) amt = player.gain
+        if (player.gain.gte(player.points)) amt = new Decimal(player.gain)
         player.i.doomSoftcap = player.i.doomSoftcap.div(amt.div(player.i.doomSoftcapStart).add(1).log(player.i.doomSoftcapStart).div(doomWeaken).add(1))
         if (hasUpgrade("depth2", 104)) player.i.doomSoftcap = player.i.doomSoftcap.max(0.01)
 
@@ -219,10 +219,10 @@
             player.points = player.points.div(player.points.add(1).log10().mul(0.1).add(1).mul(delta))
         }
         if (player.po.halter.points.enabled == 1) player.gain = player.gain.div(player.po.halter.points.halt)
-        if (player.po.halter.points.enabled == 2 && player.gain.gt(player.po.halter.points.halt)) player.gain = player.po.halter.points.halt
-        if (!player.in.breakInfinity && player.gain.gte("9.99e309")) player.gain = new Decimal("9.99e309")
+        if (player.po.halter.points.enabled == 2 && player.gain.gt(player.po.halter.points.halt)) player.gain.set(player.po.halter.points.halt)
+        if (!player.in.breakInfinity && player.gain.gte("9.99e309")) player.gain.set(new Decimal("9.99e309"))
 
-        setTr("pointGain", player.gain, "Whole Amount", true)
+        player.gain = new Decimal(player.gain)
         // CELESTIAL POINT PER SECOND
         player.points = player.points.add(player.gain.mul(delta))
 
@@ -231,7 +231,7 @@
 
         if (player.i.pylonBuilt)
         {
-            player.i.pylonEnergyPerSecond = new Decimal(1)
+            player.i.pylonEnergyPerSecond = new TrackedDecimal(1,player.calc.calculations["py1Gain"]=[])
             player.i.pylonEnergyPerSecond = player.i.pylonEnergyPerSecond.mul(buyableEffect("i", 11))
             player.i.pylonEnergyPerSecond = player.i.pylonEnergyPerSecond.mul(buyableEffect("i", 12))
             player.i.pylonEnergyPerSecond = player.i.pylonEnergyPerSecond.mul(buyableEffect("i", 13))
@@ -250,8 +250,10 @@
         if (player.i.pylonEnergy.gte(player.i.pylonEnergyMax))
         {
             player.i.pylonEnergy = player.i.pylonEnergyMax
-            player.i.pylonEnergyPerSecond = new Decimal(0)
+            player.i.pylonEnergyPerSecond.set(0)
         }
+        //stop tracking if it is tracked
+        player.i.pylonEnergyPerSecond = new Decimal(player.i.pylonEnergyPerSecond)
         player.i.pylonEnergy = player.i.pylonEnergy.add(player.i.pylonEnergyPerSecond.mul(delta))
 
         player.i.pylonEnergyEffect = player.i.pylonEnergy.add(1).pow(player.i.pylonTierEffect).log(10).add(1).pow(0.8).sub(1).pow_base(10).sub(1).pow(4).add(1)
