@@ -122,7 +122,7 @@
         //----------------------------------------
 
         // START OF CELESTIAL POINT MODIFIERS
-        player.gain = new TrackedDecimal(1, player.calc.calculations['pointGain']=[])
+        player.gain = new TrackedDecimal(1)//, player.calc.calculations['pointGain']=[])
         player.gain = player.gain.mul(player.r.rankEffect)
         player.gain = player.gain.mul(player.r.tierEffect)
         player.gain = player.gain.mul(buyableEffect("f", 11))
@@ -206,7 +206,7 @@
 
         // PLACE ANY BASE MODIFIERS TO SOFTCAP OF DOOM BEFORE SCALING
         let amt = player.points
-        if (player.gain.gte(player.points)) amt = new Decimal(player.gain)
+        if (player.gain.gte(player.points)) amt = player.gain.getDecimal()
         player.i.doomSoftcap = player.i.doomSoftcap.div(amt.div(player.i.doomSoftcapStart).add(1).log(player.i.doomSoftcapStart).div(doomWeaken).add(1))
         if (hasUpgrade("depth2", 104)) player.i.doomSoftcap = player.i.doomSoftcap.max(0.01)
 
@@ -221,7 +221,8 @@
         if (player.po.halter.points.enabled == 1) player.gain = player.gain.div(player.po.halter.points.halt)
         if (player.po.halter.points.enabled == 2 && player.gain.gt(player.po.halter.points.halt)) player.gain.set(player.po.halter.points.halt)
         if (!player.in.breakInfinity && player.gain.gte("9.99e309")) player.gain.set(new Decimal("9.99e309"))
-
+        
+        player.calc.calculations["pointGain"] = player.gain.getTrackedArray()
         player.gain = new Decimal(player.gain)
         // CELESTIAL POINT PER SECOND
         player.points = player.points.add(player.gain.mul(delta))

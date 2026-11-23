@@ -282,9 +282,7 @@ class TrackedDecimal extends Decimal{
                     if(res instanceof Decimal){
                         target.dec = res
                         return receiver
-                    } else {
-                        return res
-                    }
+                    } else return res
                 }
             }
             return target.dec[prop]
@@ -298,8 +296,8 @@ class TrackedDecimal extends Decimal{
         }
     }
 
-    constructor(value, trackingArray){
-        if (Object.hasOwn(value, "dec") && Object.hasOwn(value, "track")){
+    constructor(value, trackingArray = []){
+        if (value?.verification == "TrackedDecimal"){
             super(0)
             delete this.layer
             delete this.mag
@@ -314,9 +312,18 @@ class TrackedDecimal extends Decimal{
     
         const trackerData = {
             dec: new Decimal(value),
-            track: trackingArray
+            track: trackingArray,
+            verification: "TrackedDecimal"
         }
         return new Proxy(new TrackedDecimal(trackerData), TrackedDecimal.#handler)
+    }
+
+    getTrackedArray(){
+        return this.track.slice()
+    }
+
+    getDecimal(){
+        return new Decimal(this.dec)
     }
 
     set(val, desc="", reset=false){
