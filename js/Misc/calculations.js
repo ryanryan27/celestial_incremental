@@ -209,6 +209,20 @@ addLayer("calc", {
             if(type == "uni" && readData(universes[id].disabled) == true) continue
             if(type == "layer" && readData(layers[id].deactivated) == true) continue
 
+            if(type == "uni"){
+                if(readData(universes[id].disabled) == true) continue
+                
+                let shown = false
+                for (calc in player.calc.calculations){
+                    if (universes[id].tree.flat().includes(currency_glossary[calc]?.layer)){
+                        shown = true
+                        break
+                    }
+                }
+                if(!shown) continue
+            }
+
+
             if(!!layers.calc.clickables[id]){
                 calcSet.push(id)
                 continue
