@@ -12,6 +12,7 @@ addLayer("calc", {
             layer: ""
         },
         calculations: {},
+        randomSeed: 0,
     }},
     tooltip: "Calculations",
     color: "black",
@@ -79,26 +80,26 @@ addLayer("calc", {
         ["row", [["clickable", 2], ["clickable", 7], ["clickable", 4], ["clickable", 5], ["clickable", 8]]],
         ["blank", "50px"],
         ["style-column", [
-            ["raw-html", "Calculation" + (player.calc?.visibleCurrency.currency ? ": " + currency_glossary[player.calc.visibleCurrency.currency].name : ""),
+            ["raw-html", "Calculation" + (!!currency_glossary[player.calc.visibleCurrency.currency] ? ": " + currency_glossary[player.calc.visibleCurrency.currency].name : ""),
                  {color: "var(--textColor)", fontSize: "24px", fontFamily: "monospace"}],
-        ], {width: "903px", height: "40px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginBottom: "-3px", borderRadius: "30px 30px 0 0"}],
+        ], {width: "943px", height: "40px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginBottom: "-3px", borderRadius: "30px 30px 0 0"}],
         ["style-row", [
             ["theme-scroll-column",//unis
-                layers.calc.getClickableFormats("uni"),//() => {return layers.calc.getClickableFormats("uni")},
-            {width: "40px", height: "600px", background: "var(--layerBackground)", borderRight: "3px solid var(--menuBackground)"}],
+                layers.calc.getClickableFormats("uni"),
+            {width: "60px", height: "800px", background: "var(--layerBackground)", borderRight: "3px solid var(--menuBackground)"}],
             ["theme-scroll-column",//layers 
-                layers.calc.getClickableFormats("layer"),//() => {return layers.calc.getClickableFormats("layer")},
-            {width: "200px", height: "600px", background: "var(--layerBackground)", borderRight: "3px solid var(--menuBackground)"}],
+                layers.calc.getClickableFormats("layer"),
+            {width: "220px", height: "800px", background: "var(--layerBackground)", borderRight: "3px solid var(--menuBackground)"}],
             ["theme-scroll-column",//calculations
-                layers.calc.calcFormatList(),//() => {return layers.calc.calcFormatList()},
-            {width: "657px", height: "600px", background: "var(--miscButtonDisable)"}]
-        ], {width: "903px", height: "600px", background: "var(--tabTitle)", border: "3px solid var(--menuBackground)"}],
+                layers.calc.calcFormatList(),
+            {width: "657px", height: "800px", background: "var(--miscButtonDisable)"}]
+        ], {width: "943px", height: "800px", background: "var(--tabTitle)", border: "3px solid var(--menuBackground)"}],
         ["style-row", [
             ["raw-html", "yippee it works!", {color: "var(--textColor)", fontSize: "20px", fontFamily: "monospace"}],
-        ], {width: "903px", height: "30px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginTop: "-3px", borderRadius: "0 0 30px 30px"}],
+        ], {width: "943px", height: "30px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginTop: "-3px", borderRadius: "0 0 30px 30px"}],
     ]},
     layerShown() {
-        //heehee haha dumb workaround for errors when tabformat is function
+        //heehee haha dumb workaround for errors when tabformat is function and no subtabs
         if (typeof tmp.calc.tabFormat === 'function'){
             temp.calc.tabFormat = temp.calc.tabFormat()
             layers.calc["layerShown"] = ()=>{return false}
@@ -111,15 +112,18 @@ addLayer("calc", {
         if (type == "uni"){
             for (const uniID of layers.calc.generateClickables("uni")){
                 if (readData(universes[uniID].disabled) == true) continue
-                if (!!layers.calc.clickables[uniID] && readData(universes[uniID].uniShown) == true) tabs.push(["hoverless-clickable", uniID])
+                if (!!layers.calc.clickables[uniID] && readData(universes[uniID].uniShown) == true) tabs.push(["clickable", uniID])
             }
         }
         else if(type == "layer" && !!uni){
             let layer = player.calc.selectedLayer
             
-            tabs.push(["hoverless-clickable", 100])
+            //tabs.push(["hoverless-clickable", 100])
 
-            
+            tabs.push(["style-column", [
+                ["raw-html", readData(universes[uni].name), {fontSize:'1.5em'}]
+            ], Object.assign(Object.assign({},layers.calc.clickables[uni].style()), {width:"200px",'box-sizing':"border-box"})])
+
             
             for (const layerID of layers.calc.generateClickables("layer", uni)){
                 if (readData(layers[layerID].deactivated) == true) continue
@@ -127,9 +131,10 @@ addLayer("calc", {
                 let calcIDs = layers.calc.getCalcClickables(layerID)
 
                 if (calcIDs.length == 0) continue
-                if (!!layers.calc.clickables[layerID] && readData(layers[layerID].layerShown)) tabs.push(["hoverless-clickable", layerID])
+                if (!!layers.calc.clickables[layerID] && readData(layers[layerID].layerShown)) tabs.push(["clickable", layerID])
                 
                 if (layer == layerID){
+                    
                     for (const calcID of calcIDs){
                         tabs.push(["hoverless-clickable", calcID])
                     }
@@ -137,10 +142,13 @@ addLayer("calc", {
             }
         }
         else if(type == "layer"){
-            tabs.push(["hoverless-clickable", 100])
+            let unis = layers.calc.generateClickables("uni")
+            let choice = Math.floor(player.calc.randomSeed * unis.length)
+            tabs.push(["style-column", [
+                ["raw-html", "Pick a Universe!", {fontSize:'1.5em'}]
+            ], Object.assign(Object.assign({},layers.calc.clickables[unis[choice]].style()), {width:"200px",'box-sizing':"border-box"})])
             
         }
-        tabs
         return tabs
     },
     calcFormatList(){
@@ -155,7 +163,7 @@ addLayer("calc", {
             ], {width: "651px", height: "40px", border: "3px solid var(--regBorder)", }])
         }
         else {
-            selected.splice(0,0,{operation:"Total", effect:selected.at(-1).result, result:selected.at(-1).result, description:"Related Values"})
+            selected.splice(0,0,{operation:"Total", effect:selected.at(-1).result, result:selected.at(-1).result, description:"From the following modifiers:"})
             for (op of selected){
                 let bg = (op.operation=="Total"?"var(--miscButtonHover)":"var(--miscButtonDisable")
                 let border = (op.operation=="Total"? {'border-block':"3px solid var(--regBorder)"} : {'border-bottom':"3px solid var(--regBorder)"})
@@ -172,7 +180,7 @@ addLayer("calc", {
             }
             selected.splice(0,1)
         }
-        calc_components
+        player.calc.calculations = {}
         return calc_components
     },
     generateClickables(type, uniID=""){
@@ -202,7 +210,7 @@ addLayer("calc", {
                 continue
             }
 
-            let look = {background: "var(--miscButton)", border: "3px solid rgba(0,0,0,0.3)", color:"rgba(0,0,0,0.5)"}
+            let look = {background: "var(--miscButton)", border: "3px solid rgba(0,0,0,0.3)", color:"rgba(0,0,0,0.5)",}
             let ns = readData(elemType[id].nodeStyle)
             if (ns?.background || ns?.backgroundColor){
                 Object.assign(look, ns)
@@ -220,10 +228,11 @@ addLayer("calc", {
                 canClick: true,
                 unlocked: true,
                 onClick() {
+                    player.calc.randomSeed = Math.random()
                     selectFunc(id)
                 },
                 style() {
-                    let sty = {fontSize: "14px", borderRadius: "0", 'transition-duration':"0s"}
+                    let sty = {fontSize: "14px", borderRadius: "10px", marginTop:"10px"}
                     return Object.assign(look, sty)
                 }
             }
@@ -235,8 +244,8 @@ addLayer("calc", {
     getCalcClickables(layer){
         let layerCalcs = []
         for (const currency of Object.keys(player.calc.calculations)){
-            if(currency_glossary[currency].layer != layer) continue
-            let colors =  {background: "var(--miscButton)", borderColor: "var(--miscButtonDisable)", color:"var(--textColor)"}
+            if(currency_glossary[currency]?.layer != layer) continue
+            let colors =  {background: "var(--miscButton)", 'border-color': "var(--miscButtonDisable)", color:"var(--textColor)"}
 
             let clickableData = {
                 title: currency_glossary[currency].name,
@@ -247,9 +256,10 @@ addLayer("calc", {
                     player.calc.visibleCurrency.layer = layer
                 },
                 style() {
-                    let look = {width: "200px", minHeight: "40px", fontSize: "14px", color: colors.color, background: colors.background, border: "3px solid", borderColor:colors.borderColor , borderRadius: "0", 'transition-duration':"0s"}
-                    if (player.calc.visibleCurrency.currency == currency) look.borderColor = "var(--selected)"
-                    return look
+                    let look = {width: "200px", minHeight: "40px", fontSize: "14px", border: "3px solid", borderRadius: "10px"}
+                    if (player.calc.visibleCurrency.currency == currency) look['border'] = "3px solid var(--selected)"
+                    else look['border'] = "3px solid var(--miscButtonDisable)"
+                    return Object.assign(colors, look)
                 }
             }
             createClickable("calc",currency,clickableData)
@@ -300,6 +310,7 @@ class TrackedDecimal extends Decimal{
         }
 
         trackingArray.splice(0)
+        trackingArray.push({operation:'=>', effect:value, result:value, description:"Initial Value"})
     
         const trackerData = {
             dec: new Decimal(value),
@@ -311,7 +322,7 @@ class TrackedDecimal extends Decimal{
     set(val, desc="", reset=false){
         this.dec = new Decimal(val)
         if(reset)this.track.splice(0)
-        this.track.push({operation:'=', effect:val, result:val, description:desc})
+        this.track.push({operation:'=>', effect:val, result:val, description:desc})
         return this
     }
 
@@ -377,5 +388,4 @@ function upgradeTitle(layer, id, layername=false) {
 
 let currency_glossary = []
 currency_glossary["pointGain"] = {layer: "i", name:"Celestial Point Gain"}
-currency_glossary["py1Gain"] = {layer: "i", name:"Ancient Pylon Energy gain"}
-//currency_glossary["smaRequirement"] = {layer: "le", name:"SMA Reset Requirement"}
+currency_glossary["pylon1"] = {layer: "i", name:"Ancient Pylon Energy Gain"}
