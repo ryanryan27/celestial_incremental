@@ -164,7 +164,11 @@ addLayer("calc", {
         }
         else {
             selected.splice(0,0,{operation:"Total", effect:selected.at(-1).result, result:selected.at(-1).result, description:"From the following modifiers:"})
+            let randomSeed = Math.floor(player.calc.randomSeed*excuses.length)
             for (op of selected){
+                let rand = Math.sin(randomSeed++)*1e6
+                rand = rand - Math.floor(rand)
+                op.description = (op.description ? op.description : excuses[Math.floor(rand*excuses.length)])
                 let bg = (op.operation=="Total"?"var(--miscButtonHover)":"var(--miscButtonDisable")
                 let border = (op.operation=="Total"? {'border-block':"3px solid var(--regBorder)"} : {'border-bottom':"3px solid var(--regBorder)"})
                 let font = {color: "var(--textColor)", fontSize: "14px", fontFamily: "monospace"}
@@ -396,3 +400,33 @@ function upgradeTitle(layer, id, layername=false) {
 let currency_glossary = []
 currency_glossary["pointGain"] = {layer: "i", name:"Celestial Point Gain"}
 currency_glossary["pylon1"] = {layer: "i", name:"Ancient Pylon Energy Gain"}
+
+
+
+
+let excuses = [
+    "Secret ;)",
+    "Oops forgot to add this one",
+    "A mystery number",
+    "The thing",
+    "Gwa",
+    "SPOILER",
+    "A unique and distinct value",
+    "The dev didn't get to this one yet",
+    "Lost in a big crunch",
+    "???",
+    "REDACTED",
+    "¯\\_(ツ)_/¯",
+    "Something did this...",
+    "???? Buyable: ????",
+    "A Krillion Dollars!",
+    "meow meow meow",
+    "cant remember",
+    "have you tried restarting?",
+    "the one piece is real",
+    "oh it broke",
+    "n-dimensional polygon",
+    "the direction of negative curvature for a non-linear optimisation problem",
+    "idk but number go up please",
+    "let me consult the diagram"
+]
