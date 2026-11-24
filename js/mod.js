@@ -82,6 +82,14 @@ function updateStyles() {
 		options.fullscreen = false
 	}
 
+	//
+	if ((window.innerWidth > 1250 || window.innerWidth < 2*parseInt(getComputedStyle(document.querySelector('.miscButtonHolder'))['min-width'])+10)
+		&& !player.cp.cantepocalypseActive && !player.sma.inStarmetalChallenge){
+		document.body.style.setProperty('--miscMenuHeight', '14%')
+	} else {
+		document.body.style.setProperty('--miscMenuHeight', '7%')
+	}
+	document.body.style.setProperty('--layerHolderHeight', 'calc(100% - var(--miscMenuHeight) - var(--uniHolderHeight))')
 	// ===------   CHANGE LAYER SIZE   ------=== //
 	const LAYERHOLDER = document.getElementById('layerHolder')
 	if (LAYERHOLDER) {
@@ -99,11 +107,11 @@ function updateStyles() {
 				LAYERHOLDER.style.setProperty("min-width", "calc(100% - 400px)", "important")
 				LAYERHOLDER.style.setProperty("height", "100%", "important")
 			} else {
-				LAYERHOLDER.style.setProperty("top", "calc(7% + 307px)", "important")
+				LAYERHOLDER.style.setProperty("top", "calc(var(--uniHolderHeight) + 307px)", "important")
 				LAYERHOLDER.style.setProperty("left", "0px", "important")
 				LAYERHOLDER.style.setProperty("width", "100%", "important")
 				LAYERHOLDER.style.setProperty("min-width", "100%", "important")
-				LAYERHOLDER.style.setProperty("height", "calc(86% - 313px)", "important")
+				LAYERHOLDER.style.setProperty("height", "calc(var(--layerHolderHeight) - 313px)", "important")
 			}
 		}
 	}
@@ -132,14 +140,14 @@ function updateStyles() {
 			if (player.c.cutscene1 || player.c.cutscene2 || player.c.cutscene13 || (player.c.currentCutscene == 35 && player.c.cutsceneIndex >= 24)) layerBG = "linear-gradient(-0deg, #000)"
 			if (player.c.currentCutscene == 33 || player.c.currentCutscene == 34 || (player.c.currentCutscene == 35 && player.c.cutsceneIndex < 24)) layerBG = "linear-gradient(-180deg,rgb(114, 8, 4) 0%, rgb(114, 4, 85) 100%)"
 			break;
-		case "settings": case "jukebox": case "savebank": case "changelog": case "credits": case "calc":
+		case "settings": case "jukebox": case "savebank": case "changelog": case "credits":
 			if (!player.sma.inStarmetalChallenge && !options.themeDarken) {
 				layerBG = "linear-gradient(90deg, #57636d, #2e3d49)"
 			} else {
 				layerBG = "linear-gradient(90deg, #1b242b, #12181d)"
 			}
 			break;
-		case "achievements":
+		case "achievements": case "calc":
 			if (!player.sma.inStarmetalChallenge && !options.themeDarken) {
 				layerBG = "linear-gradient(45deg, #450054, #00307f)"
 			} else {
@@ -702,7 +710,7 @@ function updateStyles() {
         	lightRayBackground.style.overflow = "hidden";
 	    }
 		const el = document.getElementById("lightRay-background");
-		let pos = window.innerWidth > 1250 ? "calc(50% + 200px) 100%" : "50% calc(93% - 6px)"
+		let pos = window.innerWidth > 1250 ? "calc(50% + 200px) 100%" : "50% calc(100% - var(--miscMenuHeight) - 6px)"
 		let color = "#ffffff"
 		switch (player.tab) {
 			case "wel": {
@@ -2347,7 +2355,7 @@ var doNotCallTheseFunctionsEveryTick = [
 	"levelableButtonStyle",
 	"prismReset", "blueshiftReset", "starlightReset", "timeCapsuleReset", "createMultiverseMapConnection", "createClickableConnection",
 	"makeProject", "makeLightWell", "makePrismFountain", "makeWellFountain", "makeStarlightFountain", "getTimeReq", "getTimeCapsuleReq", "getTimeSpeed", "lightGain",
-	"getClickableFormats", "calcFormatList", "generateClickables", "getCalcClickables"
+	"getClickableFormats", "calcFormatList", "generateClickables", "getCalcClickables", "setTracking"
 ]
 
 function getStartPoints(){
