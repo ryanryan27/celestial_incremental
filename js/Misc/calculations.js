@@ -13,9 +13,13 @@ addLayer("calc", {
         },
         calculations: {},
         randomSeed: 0,
+        tracking: true,
     }},
     tooltip: "Calculations",
     color: "black",
+    update(_delta){
+        TrackedDecimal.setTracking(player.calc.tracking ??= true)
+    },
     clickables: {
         2: {
             title() { return "Settings" },
@@ -63,40 +67,51 @@ addLayer("calc", {
             style: { width: '125px', minHeight: '50px', color: "var(--textColor)", background: "var(--miscButtonDisable)", borderRadius: '0px', border: "3px solid var(--regBorder)", margin: "0px 5px" },
         },
         100: {
-            title: "Clear Currency",
+            title() {return (player.calc.tracking ? "Disable Calculations...<br>:(" : "Enable Calculations!!<br>:D")},
             canClick: true,
             unlocked: true,
             onClick() {
-                player.calc.visibleCurrency.currency = ""
-                player.calc.visibleCurrency.layer = ""
+                layers.calc.setTracking(!player.calc.tracking)
             },
             style() {
-                let look = {width: "200px", minHeight: "40px", fontSize: "14px", color: "var(--textColor)", background: "var(--miscButton)", border: "3px solid var(--miscButtonDisable)", borderRadius: "0"}
-                return look
+                if (!player.calc.tracking) 
+                    return {width: "400px", minHeight: "40px", fontSize: "20px",
+                    color: "var(--miscButtonDisable)", background: "linear-gradient(12deg, #52e0a5 23%, #f3933a 74%)",
+                    border: "3px solid var(--miscButtonDisable)", borderRadius: "20px"}
+                else
+                    return {width: "200px", minHeight: "20px", fontSize: "10px",
+                    color: "var(--textColor)", background: "var(--miscButton)",
+                    border: "3px solid var(--miscButtonDisable)", borderRadius: "10px"}
             },
         },
     },
     tabFormat: [
         ["row", [["clickable", 2], ["clickable", 7], ["clickable", 4], ["clickable", 5], ["clickable", 8]]],
         ["blank", "50px"],
-        ["style-column", [
-            ["raw-html", () => {return ("Calculation" +  (!!currency_glossary[player.calc.visibleCurrency.currency] ? ": " + currency_glossary[player.calc.visibleCurrency.currency].name : ""))},
-                 {color: "var(--textColor)", fontSize: "24px", fontFamily: "monospace"}],
-        ], {width: "943px", height: "40px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginBottom: "-3px", borderRadius: "30px 30px 0 0"}],
-        ["style-row", [
-            ["theme-scroll-column",//unis
-                () => {return layers.calc.getClickableFormats("uni")},
-            {width: "60px", height: "800px", background: "var(--layerBackground)", borderRight: "3px solid var(--menuBackground)"}],
-            ["theme-scroll-column",//layers 
-                () => {return layers.calc.getClickableFormats("layer")},
-            {width: "220px", height: "800px", background: "var(--layerBackground)", borderRight: "3px solid var(--menuBackground)"}],
-            ["theme-scroll-column",//calculations
-                () => {return layers.calc.calcFormatList()},
-            {width: "657px", height: "800px", background: "var(--miscButtonDisable)"}]
-        ], {width: "943px", height: "800px", background: "var(--tabTitle)", border: "3px solid var(--menuBackground)"}],
-        ["style-row", [
-            ["raw-html", "yippee it works!", {color: "var(--textColor)", fontSize: "20px", fontFamily: "monospace"}],
-        ], {width: "943px", height: "30px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginTop: "-3px", borderRadius: "0 0 30px 30px"}],
+        ["column", () => {return ((player.calc.tracking ??= true) ? 
+            [["style-column", [
+                ["raw-html", ("Calculation" +  (!!currency_glossary[player.calc.visibleCurrency.currency] ? ": " + currency_glossary[player.calc.visibleCurrency.currency].name : "")),
+                    {color: "var(--textColor)", fontSize: "24px", fontFamily: "monospace"}],
+            ], {width: "943px", height: "40px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginBottom: "-3px", borderRadius: "30px 30px 0 0"}],
+            ["style-row", [
+                ["theme-scroll-column",//unis
+                    layers.calc.getClickableFormats("uni"),
+                {width: "60px", height: "800px", background: "var(--layerBackground)", borderRight: "3px solid var(--menuBackground)"}],
+                ["theme-scroll-column",//layers 
+                    layers.calc.getClickableFormats("layer"),
+                {width: "220px", height: "800px", background: "var(--layerBackground)", borderRight: "3px solid var(--menuBackground)"}],
+                ["theme-scroll-column",//calculations
+                    layers.calc.calcFormatList(),
+                {width: "657px", height: "800px", background: "var(--miscButtonDisable)"}]
+            ], {width: "943px", height: "800px", background: "var(--tabTitle)", border: "3px solid var(--menuBackground)"}],
+            ["style-row", [
+                ["raw-html", "yippee it works!", {color: "var(--textColor)", fontSize: "20px", fontFamily: "monospace"}],
+            ], {width: "943px", height: "30px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginTop: "-3px", borderRadius: "0 0 30px 30px"}]] 
+            : 
+            [["raw-html", "Tracking is Disabled :("]]
+        )},],
+        ["blank", "20px"],
+        ["clickable", 100]
     ],
     layerShown() {
         return false },
@@ -110,11 +125,10 @@ addLayer("calc", {
                 if (!!layers.calc.clickables[uniID] && readData(universes[uniID].uniShown) == true) tabs.push(["clickable", uniID])
             }
         }
-        else if(type == "layer" && !!uni){
+        else if(type == "layer" && !!uni && !!layers?.calc?.clickables[uni]){
             let layer = player.calc.selectedLayer
             
             //tabs.push(["hoverless-clickable", 100])
-
             tabs.push(["style-column", [
                 ["raw-html", readData(universes[uni].name), {fontSize:'1.5em'}]
             ], Object.assign(Object.assign({},layers.calc.clickables[uni].style()), {width:"200px",'box-sizing':"border-box"})])
@@ -150,7 +164,7 @@ addLayer("calc", {
     calcFormatList(){
         let currency = player.calc.visibleCurrency.currency
 
-        let selected = (!!player.calc.calculations[currency] ? player.calc.calculations[currency] : [])
+        let selected = player.calc.calculations[currency] ?? []
 
         let calc_components = []
         if (selected.length == 0){
@@ -266,8 +280,13 @@ addLayer("calc", {
                 canClick: true,
                 unlocked: true,
                 onClick() {
-                    player.calc.visibleCurrency.currency = currency
-                    player.calc.visibleCurrency.layer = layer
+                    if(player.calc.visibleCurrency.currency == currency){
+                        player.calc.visibleCurrency.currency = ""
+                        player.calc.visibleCurrency.layer = ""
+                    } else {
+                        player.calc.visibleCurrency.currency = currency
+                        player.calc.visibleCurrency.layer = layer
+                    }
                 },
                 style() {
                     let look = {width: "200px", minHeight: "40px", fontSize: "14px", border: "3px solid", borderRadius: "10px"}
@@ -281,10 +300,26 @@ addLayer("calc", {
         }
         return layerCalcs
     },
+    setTracking(bool){
+        if(!bool) Object.assign(player.calc, layers.calc.startData())
+        player.calc.tracking = !!bool
+        TrackedDecimal.setTracking(player.calc.tracking)
+        
+    }
 })
 
 
 class TrackedDecimal extends Decimal{
+
+    static #doTracking = true
+
+    static setTracking(bool){
+        this.#doTracking = !!bool
+    }
+
+    static isTracking(){
+        return this.#doTracking
+    }
 
     static #handler = {
         get(target, prop, receiver) {
@@ -321,9 +356,10 @@ class TrackedDecimal extends Decimal{
             return
         }
 
-        trackingArray.splice(0)
-        trackingArray.push({operation:'=>', effect:value, result:value, description:"Initial Value"})
-    
+        if(TrackedDecimal.#doTracking){
+            trackingArray.splice(0)
+            trackingArray.push({operation:'=>', effect:value, result:value, description:"Initial Value"})
+        }
         const trackerData = {
             dec: new Decimal(value),
             track: trackingArray,
@@ -333,7 +369,7 @@ class TrackedDecimal extends Decimal{
     }
 
     getTrackedArray(){
-        return this.track.slice()
+        return TrackedDecimal.#doTracking ? this.track.slice() : undefined
     }
 
     getDecimal(){
@@ -342,6 +378,7 @@ class TrackedDecimal extends Decimal{
 
     set(val, desc="", reset=false){
         this.dec = new Decimal(val)
+        if (TrackedDecimal.#doTracking) return this
         if(reset)this.track.splice(0)
         this.track.push({operation:'=>', effect:val, result:val, description:desc})
         return this
@@ -352,7 +389,7 @@ class TrackedDecimal extends Decimal{
         let result = this.dec[opName](val)
         if (tracked){
             this.dec = result
-            this.track.push({operation:op, effect:val, result:result, description:desc})
+            if(TrackedDecimal.#doTracking)this.track.push({operation:op, effect:val, result:result, description:desc})
             return this
         } else return result
     }
