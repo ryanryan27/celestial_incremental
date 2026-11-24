@@ -76,34 +76,29 @@ addLayer("calc", {
             },
         },
     },
-    tabFormat() {return [
+    tabFormat: [
         ["row", [["clickable", 2], ["clickable", 7], ["clickable", 4], ["clickable", 5], ["clickable", 8]]],
         ["blank", "50px"],
         ["style-column", [
-            ["raw-html", "Calculation" + (!!currency_glossary[player.calc.visibleCurrency.currency] ? ": " + currency_glossary[player.calc.visibleCurrency.currency].name : ""),
+            ["raw-html", () => {return ("Calculation" +  (!!currency_glossary[player.calc.visibleCurrency.currency] ? ": " + currency_glossary[player.calc.visibleCurrency.currency].name : ""))},
                  {color: "var(--textColor)", fontSize: "24px", fontFamily: "monospace"}],
         ], {width: "943px", height: "40px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginBottom: "-3px", borderRadius: "30px 30px 0 0"}],
         ["style-row", [
             ["theme-scroll-column",//unis
-                layers.calc.getClickableFormats("uni"),
+                () => {return layers.calc.getClickableFormats("uni")},
             {width: "60px", height: "800px", background: "var(--layerBackground)", borderRight: "3px solid var(--menuBackground)"}],
             ["theme-scroll-column",//layers 
-                layers.calc.getClickableFormats("layer"),
+                () => {return layers.calc.getClickableFormats("layer")},
             {width: "220px", height: "800px", background: "var(--layerBackground)", borderRight: "3px solid var(--menuBackground)"}],
             ["theme-scroll-column",//calculations
-                layers.calc.calcFormatList(),
+                () => {return layers.calc.calcFormatList()},
             {width: "657px", height: "800px", background: "var(--miscButtonDisable)"}]
         ], {width: "943px", height: "800px", background: "var(--tabTitle)", border: "3px solid var(--menuBackground)"}],
         ["style-row", [
             ["raw-html", "yippee it works!", {color: "var(--textColor)", fontSize: "20px", fontFamily: "monospace"}],
         ], {width: "943px", height: "30px", background: "var(--scroll4)", border: "3px solid var(--menuBackground)", marginTop: "-3px", borderRadius: "0 0 30px 30px"}],
-    ]},
+    ],
     layerShown() {
-        //heehee haha dumb workaround for errors when tabformat is function and no subtabs
-        if (typeof tmp.calc.tabFormat === 'function'){
-            temp.calc.tabFormat = temp.calc.tabFormat()
-            layers.calc["layerShown"] = ()=>{return false}
-        }
         return false },
     getClickableFormats(type){
         let tabs = []
@@ -144,6 +139,7 @@ addLayer("calc", {
         else if(type == "layer"){
             let unis = layers.calc.generateClickables("uni")
             let choice = Math.floor(player.calc.randomSeed * unis.length)
+            if (!unis[choice]) return tabs
             tabs.push(["style-column", [
                 ["raw-html", "Pick a Universe!", {fontSize:'1.5em'}]
             ], Object.assign(Object.assign({},layers.calc.clickables[unis[choice]].style()), {width:"200px",'box-sizing':"border-box"})])
@@ -380,15 +376,19 @@ class TrackedDecimal extends Decimal{
 }
 
 function createClickable(layer, id, clickableData){
+    
+    if(!layers[layer]) return
 
-	if(!layers[layer]) return
+    if(!!tmp[layer]?.clickables[id] && !!funcs[layer]?.clickables[id]){
+        return
+    }
     
     if(!layers[layer].clickables[id]) layers[layer].clickables[id] = {}
 
 	Object.assign(layers[layer].clickables[id], clickableData)
 	layers[layer].clickables[id].layer = layer
 	layers[layer].clickables[id].id = ''+id
-	setupTempData(layers[layer].clickables[id], tmp[layer].clickables[id] = {}, funcs[layer].clickables[id] = [])
+    setupTempData(layers[layer].clickables[id], tmp[layer].clickables[id] = {}, funcs[layer].clickables[id] = [])
     player[layer].clickables[id] = ""
 }
 
